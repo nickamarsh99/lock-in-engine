@@ -1,0 +1,6 @@
+# Signal Miner targets: one keyword or competitor name per line.
+# Blank lines and anything after a # are ignored.
+procrastination
+deep work
+focus app
+Atomic Habits
