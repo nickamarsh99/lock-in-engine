@@ -1,4 +1,6 @@
 pillow>=10
 numpy>=1.24
-# Optional, for accurate word-level captions:
-# faster-whisper>=1.0
+google-api-python-client>=2.100
+google-auth>=2.20
+# Accurate word-level captions (model downloads from huggingface.co and *.hf.co):
+faster-whisper>=1.0

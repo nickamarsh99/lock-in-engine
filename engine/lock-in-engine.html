@@ -4,6 +4,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Barlow:wght@400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400;1,6..72,500&display=swap">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
 <style>
 /* Layout: a working desk. Sticky top bar with sprint progress, four views (Sprint, Studio, Generate, Playbook), single column on phones. */
 :root {
@@ -189,6 +190,45 @@ textarea { resize: vertical; line-height: 1.45 }
 .pr-bar button.go { background: #F2A35E; color: #1A1512; border-color: #F2A35E; min-width: 86px }
 .pr-bar button[aria-pressed="true"] { border-color: #F2A35E; color: #F2A35E }
 .pr-bar .grp { display: inline-flex; gap: 4px; align-items: center; color: #BFAF9F }
+/* Content tree */
+.tree-head { display: flex; flex-wrap: wrap; gap: 10px; align-items: center }
+.tree-head input[type=search] { flex: 1 1 220px; max-width: 360px; background: var(--surface); border: 1px solid var(--line); border-radius: 999px; padding: 8px 14px }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 999px; overflow: hidden }
+.seg button { border: 0; background: var(--surface); padding: 6px 14px; font-weight: 600 }
+.seg button[aria-pressed="true"] { background: var(--ink); color: var(--bg) }
+.treewrap { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 16px; align-items: start }
+@media (max-width: 900px) { .treewrap { grid-template-columns: minmax(0, 1fr) } }
+.tree-map { position: relative; height: max(460px, 72vh); background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); overflow: hidden; touch-action: none }
+.tree-map svg { width: 100%; height: 100%; display: block; cursor: grab }
+.tree-map svg:active { cursor: grabbing }
+.tree-map .links path { fill: none; stroke-opacity: .45; stroke-width: 1.6 }
+.tree-map .tn { cursor: pointer; outline: none }
+.tree-map .tn text { font-family: var(--f-ui); font-size: 13.5px; fill: var(--ink); paint-order: stroke; stroke: var(--surface); stroke-width: 4px; stroke-linejoin: round }
+.tree-map .tn.d0 text { font-family: var(--f-display); font-weight: 800; font-size: 22px; text-transform: uppercase }
+.tree-map .tn.d1 text { font-family: var(--f-display); font-weight: 700; font-size: 18px; text-transform: uppercase; letter-spacing: .02em }
+.tree-map .tn.pillar text { font-weight: 700; font-size: 15px }
+.tree-map .tn .more { fill: var(--muted); font-weight: 600; font-size: 12px }
+.tree-map .tn.sel text { fill: var(--sun); font-weight: 800 }
+.tree-map .tn.hit text { text-decoration: underline; text-decoration-color: var(--sun); text-decoration-thickness: 2px }
+.tree-map .tn:focus-visible circle { stroke-width: 5 }
+.map-tools { position: absolute; right: 10px; bottom: 10px; display: flex; gap: 6px }
+.map-tools button { background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 4px 10px; font-weight: 700 }
+.map-hint { position: absolute; left: 12px; bottom: 10px; font-size: 12px; color: var(--muted); pointer-events: none }
+.tree-edit { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 80px) }
+.tree-edit .crumb { font-size: 12px; color: var(--muted); overflow-wrap: anywhere }
+.outline { list-style: none; margin: 0; padding: 0 0 0 4px }
+.outline .outline { padding-left: 18px; border-left: 1px solid var(--line); margin-left: 8px }
+.outline li { margin: 1px 0 }
+.ol-row { display: flex; align-items: center; gap: 4px }
+.ol-tog { width: 24px; height: 24px; border: 0; background: none; color: var(--muted); flex: none; font-size: 12px }
+.ol-item { border: 0; background: none; text-align: left; padding: 3px 6px; border-radius: 6px; display: inline-flex; gap: 8px; align-items: center; min-width: 0 }
+.ol-item:hover { background: var(--bg) }
+.ol-item.sel { background: var(--sun-soft); font-weight: 700 }
+.ol-item .lbl { overflow-wrap: anywhere }
+.ol-item .ct { color: var(--muted); font-size: 12px }
+.outline-box { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 14px; max-height: max(460px, 72vh); overflow: auto }
+.legend { display: flex; flex-wrap: wrap; gap: 10px; font-size: 12px; color: var(--muted) }
+.legend span { display: inline-flex; gap: 5px; align-items: center }
 .toast { position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--ink); color: var(--bg); padding: 9px 16px; border-radius: 999px; font-weight: 600; font-size: 14px; z-index: 20 }
 @media (prefers-reduced-motion: no-preference) { .toast { animation: rise .2s ease-out } @keyframes rise { from { transform: translate(-50%, 8px); opacity: 0 } } }
 </style>
@@ -201,6 +241,7 @@ textarea { resize: vertical; line-height: 1.45 }
       <a href="#sprint" data-v="sprint">Sprint</a>
       <a href="#studio" data-v="studio">Studio</a>
       <a href="#generate" data-v="generate">Generate</a>
+      <a href="#tree" data-v="tree">Tree</a>
       <a href="#playbook" data-v="playbook">Playbook</a>
     </nav>
   </div>
@@ -210,6 +251,7 @@ textarea { resize: vertical; line-height: 1.45 }
   <section class="view" id="v-sprint"></section>
   <section class="view" id="v-studio" hidden></section>
   <section class="view" id="v-generate" hidden></section>
+  <section class="view" id="v-tree" hidden></section>
   <section class="view" id="v-playbook" hidden></section>
 </main>
 <div id="toast" class="toast" hidden></div>
@@ -335,10 +377,14 @@ const store = {
         onData();
       }, e => { storeMode = "error"; console.warn(e); onData(); });
       db.doc("settings/main").onSnapshot(s => { if (s.exists) settings = { ...DEFAULT_SETTINGS, ...s.data() }; onData(); });
+      db.collection("tree").onSnapshot(snap => {
+        tree = snap.docs.map(d => ({ ...structuredClone(d.data()), id: d.id })); treeReady = true; onTreeData();
+      }, () => { treeReady = true; onTreeData(); });
       db.doc("voice/profile").onSnapshot(s => { if (s.exists) voice = { notes: "", ...structuredClone(s.data()) }; if (!$("#v-playbook").contains(document.activeElement)) renderPlaybook(); });
     } else {
       storeMode = "local";
-      try { posts = JSON.parse(localStorage.getItem("lie-posts") || "[]"); settings = { ...DEFAULT_SETTINGS, ...JSON.parse(localStorage.getItem("lie-settings") || "{}") }; voice = { notes: "", ...JSON.parse(localStorage.getItem("lie-voice") || "{}") }; } catch {}
+      try { posts = JSON.parse(localStorage.getItem("lie-posts") || "[]"); settings = { ...DEFAULT_SETTINGS, ...JSON.parse(localStorage.getItem("lie-settings") || "{}") }; voice = { notes: "", ...JSON.parse(localStorage.getItem("lie-voice") || "{}") }; tree = JSON.parse(localStorage.getItem("lie-tree") || "[]"); } catch {}
+      treeReady = true; onTreeData();
       onData();
     }
     renderGenerate();
@@ -356,6 +402,19 @@ const store = {
     posts = posts.filter(p => p.id !== id);
     try { localStorage.setItem("lie-posts", JSON.stringify(posts)); } catch {}
     onData();
+  },
+  async saveNode(n) {
+    const { id, ...body } = n;
+    if (storeMode === "db") return db.collection("tree").doc(id).set(body);
+    const i = tree.findIndex(x => x.id === id); if (i >= 0) tree[i] = { ...n }; else tree.push({ ...n });
+    try { localStorage.setItem("lie-tree", JSON.stringify(tree)); } catch {}
+    onTreeData();
+  },
+  async removeNode(id) {
+    if (storeMode === "db") return db.collection("tree").doc(id).delete();
+    tree = tree.filter(x => x.id !== id);
+    try { localStorage.setItem("lie-tree", JSON.stringify(tree)); } catch {}
+    onTreeData();
   },
   async saveVoice() {
     voice.updated = new Date().toISOString();
@@ -394,7 +453,7 @@ function nextEmptyDate() {
 }
 
 /* ---------- Routing ---------- */
-const VIEWS = ["sprint", "studio", "generate", "playbook"];
+const VIEWS = ["sprint", "studio", "generate", "tree", "playbook"];
 let view = "sprint";
 function route() {
   const h = location.hash.slice(1);
@@ -403,6 +462,7 @@ function route() {
   document.querySelectorAll("nav a").forEach(a => { if (a.dataset.v === view) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current"); });
   if (view === "studio") renderStudio();
   if (view === "generate") renderGenerate();
+  if (view === "tree") renderTree();
   window.scrollTo(0, 0);
 }
 window.addEventListener("hashchange", route);
@@ -718,6 +778,13 @@ function renderStudio() {
           <div class="row"><button class="btn primary" id="e-zip">Download all slides (.zip)</button><span class="muted" style="font-size:13px">Or save slides one at a time below each preview.</span></div>
         </div>
         <div class="panel fields">
+          <div class="row" style="justify-content:space-between"><h3 style="font-size:22px">Finished video</h3>${draft.video?.url ? `<span class="muted" style="font-size:12px">Edited ${esc(new Date(draft.video.updated || Date.now()).toLocaleDateString())}</span>` : ""}</div>
+          ${draft.video?.url
+            ? `<video src="${esc(draft.video.url)}" controls playsinline preload="metadata" style="width:100%;max-width:300px;aspect-ratio:9/16;border-radius:8px;background:#000"></video>
+               <div class="row"><button class="btn primary" id="e-savevid">Save video</button><span class="muted" style="font-size:13px">Captions, cuts, and end card are done. Post it to Reels, TikTok, and Shorts.</span></div>`
+            : `<p class="muted" style="margin:0">Film the script with the teleprompter, then drop the clip in your <b>Lock-In Raw</b> Drive folder named <b>${esc(draft.date || "YYYY-MM-DD")}.mov</b>. The edited video shows up here.</p>`}
+        </div>
+        <div class="panel fields">
           ${outBlock("caption", "Caption", draft.caption + (draft.hashtags.length ? "" : ""), 7, 2200)}
           <label class="f" for="o-hashtags">Hashtags<input type="text" id="o-hashtags" value="${esc(draft.hashtags.map(h => "#" + h).join(" "))}"></label>
           ${outBlock("script", "Video script · Reels, TikTok, Shorts", draft.script, 9, 0, `<button class="btn small sun" id="e-film">Film it</button>`)}
@@ -814,6 +881,7 @@ studio.addEventListener("click", async e => {
   else if (t.dataset.copy) { const k = t.dataset.copy; copy(k === "caption" && draft.hashtags.length ? draft.caption + "\n\n" + draft.hashtags.map(h => "#" + h).join(" ") : draft[k], "Copied " + k); }
   else if (t.dataset.save) saveSlide(Number(t.dataset.save));
   else if (t.id === "e-zip") exportZip(t);
+  else if (t.id === "e-savevid") saveVideo(t);
   else if (t.id === "e-del") $("#e-delconfirm").hidden = false;
   else if (t.id === "e-delno") $("#e-delconfirm").hidden = true;
   else if (t.id === "e-delyes") { clearTimeout(saveTimer); dirty = false; const id = draft.id; draft = null; selectedId = null; await store.remove(id); toast("Deleted"); renderStudio(); }
@@ -1004,6 +1072,12 @@ async function offer(filename, blob) {
   box.prepend(fig); toast("Saving files isn't available here");
 }
 async function saveSlide(i) { await Promise.all([loadFonts(), loadImage(draft.cover)]); offer(`${slug()}-${pad(i + 1)}.png`, await slideBlob(i)); }
+async function saveVideo(btn) {
+  btn.disabled = true; btn.textContent = "Preparing…";
+  try { const blob = await (await fetch(draft.video.url)).blob(); await offer(`${slug()}.mp4`, blob); }
+  catch { toast("Couldn't load the video. Try again."); }
+  btn.disabled = false; btn.textContent = "Save video";
+}
 async function exportZip(btn) {
   if (!draft.slides.length) return;
   if (!window.JSZip) { toast("Zip export didn't load. Save slides one at a time."); return; }
@@ -1093,6 +1167,7 @@ function renderPlaybook() {
       <label class="f" for="set-niche">Niche statement<textarea id="set-niche" rows="2">${esc(settings.niche)}</textarea></label>
       <div class="grid3">
         <label class="f" for="set-handle">Handle on slides<input type="text" id="set-handle" value="${esc(settings.handle)}"></label>
+        <label class="f" for="set-brand">Brand name<input type="text" id="set-brand" value="${esc(settings.brandName || "")}" placeholder="Center of your content tree"></label>
         <label class="f" for="set-start">Sprint starts<input type="date" id="set-start" value="${esc(settings.sprintStart)}"></label>
         <label class="f" for="set-theme">Default slide theme<select id="set-theme"><option value="auto"${THEMES[settings.theme] ? "" : " selected"}>Auto by pillar</option>${Object.entries(THEMES).map(([k, t]) => `<option value="${k}"${k === settings.theme ? " selected" : ""}>${t.label}</option>`).join("")}</select></label>
       </div>
@@ -1187,9 +1262,256 @@ $("#v-playbook").addEventListener("click", async e => {
   }
   if (id === "voice-reject") { $("#voice-proposal").hidden = true; return; }
   if (e.target.id !== "set-save") return;
-  settings = { ...settings, niche: $("#set-niche").value.trim() || DEFAULT_SETTINGS.niche, handle: $("#set-handle").value.trim(), sprintStart: $("#set-start").value || settings.sprintStart, theme: $("#set-theme").value };
+  settings = { ...settings, niche: $("#set-niche").value.trim() || DEFAULT_SETTINGS.niche, handle: $("#set-handle").value.trim(), brandName: $("#set-brand").value.trim(), sprintStart: $("#set-start").value || settings.sprintStart, theme: $("#set-theme").value };
   try { await store.saveSettings(); toast("Settings saved"); } catch { toast("Couldn't save settings. You may have view-only access."); }
 });
+
+/* ---------- Content tree ---------- */
+const KINDS = {
+  branch: ["Branch", "var(--ink)"], pillar: ["Pillar", null], topic: ["Topic", "var(--muted)"], idea: ["Content idea", "var(--sun)"],
+  series: ["Series", "var(--sun)"], niche: ["Niche / audience", "var(--p7)"], person: ["Person", "var(--p5)"], brand: ["Brand", "var(--p6)"],
+  resource: ["Book, podcast, resource", "var(--p1)"], value: ["Value", "var(--p3)"], note: ["Note", "var(--muted)"],
+};
+let tree = [], treeReady = false, treeSel = null, treeQuery = "", treeMode = innerWidth < 620 ? "outline" : "map", treeCollapsed = null, treeZoom = null, treeFitted = false;
+try { const c = JSON.parse(localStorage.getItem("lie-tree-ui") || "null"); if (c) { treeCollapsed = new Set(c.collapsed); treeMode = c.mode || "map"; } } catch {}
+const nodeColor = n => n.kind === "pillar" ? pColor(n.pillar) : n.kind === "root" ? "var(--pine)" : (KINDS[n.kind] || KINDS.note)[1];
+const byId = id => tree.find(x => x.id === id);
+function ancestors(n) { const out = []; let p = n && byId(n.parent); while (p) { out.unshift(p); p = byId(p.parent); } return out; }
+function descendants(id) { const out = []; const walk = pid => tree.filter(x => x.parent === pid).forEach(c => { out.push(c); walk(c.id); }); walk(id); return out; }
+function nodePillar(n) { for (const x of [n, ...ancestors(n).reverse()]) if (x?.pillar) return Number(x.pillar); return null; }
+function saveTreeUi() { try { localStorage.setItem("lie-tree-ui", JSON.stringify({ collapsed: [...(treeCollapsed || [])], mode: treeMode })); } catch {} }
+function onTreeData() {
+  if (!treeCollapsed && tree.length) {
+    // First visit: show the top branches and the pillars; everything else folds away.
+    const keepOpen = new Set(tree.filter(n => !n.parent && n.kind === "branch" && /pillar/i.test(n.label)).map(n => n.id));
+    treeCollapsed = new Set(tree.filter(n => tree.some(c => c.parent === n.id) && !keepOpen.has(n.id)).map(n => n.id));
+  }
+  if (view !== "tree") return;
+  if (!$("#tree-body")) return renderTree();
+  drawTree();
+  if (!$("#tree-edit")?.contains(document.activeElement)) renderTreeEditor();
+}
+function treeData() {
+  const kids = {}; tree.forEach(n => (kids[n.parent || "root"] ||= []).push(n));
+  Object.values(kids).forEach(a => a.sort((x, y) => (x.order ?? 0) - (y.order ?? 0) || String(x.label).localeCompare(String(y.label))));
+  const q = treeQuery.trim().toLowerCase();
+  const build = n => {
+    const all = (kids[n.id] || []).map(build);
+    const self = !!q && `${n.label} ${n.note || ""}`.toLowerCase().includes(q);
+    return { ...n, all, self, hits: (self ? 1 : 0) + all.reduce((a, k) => a + k.hits, 0) };
+  };
+  return build({ id: "root", label: settings.brandName || settings.handle || "My brand", kind: "root" });
+}
+const visibleKids = d => { const k = treeQuery.trim() ? d.all.filter(x => x.hits) : treeCollapsed?.has(d.id) ? [] : d.all; return k.length ? k : null; };
+
+function renderTree() {
+  const el = $("#v-tree");
+  if (!treeReady) { el.innerHTML = `<div class="empty"><h2>Loading your tree</h2></div>`; return; }
+  el.innerHTML = `
+    <div class="row" style="justify-content:space-between;align-items:end">
+      <div><p class="eyebrow">Pillars, niches, ideas, inspiration</p><h2 style="font-size:clamp(30px,5vw,46px)">Content tree</h2></div>
+      <div class="tree-head">
+        <input type="search" id="tree-q" placeholder="Search, then Enter to jump" value="${esc(treeQuery)}" aria-label="Search the tree">
+        <div class="seg" role="group" aria-label="View"><button data-tmode="map" aria-pressed="${treeMode === "map"}">Map</button><button data-tmode="outline" aria-pressed="${treeMode === "outline"}">Outline</button></div>
+        <button class="btn small" id="tree-expand">Expand all</button><button class="btn small" id="tree-collapse">Collapse</button>
+        <button class="btn small primary" id="tree-addtop">+ Branch</button>
+      </div>
+    </div>
+    <div class="legend">${Object.entries(KINDS).filter(([k]) => k !== "pillar").map(([, [l, c]]) => `<span><i class="dot" style="background:${c}"></i>${l}</span>`).join("")}<span><i class="dot" style="background:var(--p3)"></i>Pillars use their own color</span></div>
+    <div class="treewrap" id="tree-body">
+      <div id="tree-view"></div>
+      <div class="panel tree-edit fields" id="tree-edit"></div>
+    </div>`;
+  treeFitted = false;
+  drawTree(); renderTreeEditor();
+}
+function drawTree() {
+  const host = $("#tree-view"); if (!host) return;
+  if (treeMode === "outline" || !window.d3) return drawOutline(host);
+  if (!host.querySelector(".tree-map")) {
+    host.innerHTML = `<div class="tree-map" id="tree-map"><div class="map-hint">Drag to pan · pinch or scroll to zoom · tap a dot to fold</div><div class="map-tools"><button id="tree-zin" aria-label="Zoom in">+</button><button id="tree-zout" aria-label="Zoom out">−</button><button id="tree-fit">Fit</button></div></div>`;
+    const svg = d3.select("#tree-map").insert("svg", ":first-child").attr("role", "group").attr("aria-label", "Content tree map");
+    svg.append("g").attr("class", "zoomg");
+    treeZoom = d3.zoom().scaleExtent([0.12, 2.5]).on("zoom", e => svg.select(".zoomg").attr("transform", e.transform));
+    svg.call(treeZoom).on("dblclick.zoom", null);
+    treeFitted = false;
+  }
+  const svg = d3.select("#tree-map svg"), g = svg.select(".zoomg");
+  const root = d3.hierarchy(treeData(), visibleKids);
+  d3.tree().nodeSize([30, 250]).separation((a, b) => a.parent === b.parent ? 1 : 1.3)(root);
+  g.selectAll("*").remove();
+  g.append("g").attr("class", "links").selectAll("path").data(root.links()).join("path")
+    .attr("d", d3.linkHorizontal().x(d => d.y).y(d => d.x)).attr("stroke", d => nodeColor(d.target.data));
+  const nodes = g.append("g").selectAll("g").data(root.descendants()).join("g")
+    .attr("class", d => `tn d${Math.min(d.depth, 2)}${d.data.kind === "pillar" ? " pillar" : ""}${d.data.id === treeSel ? " sel" : ""}${d.data.self ? " hit" : ""}`)
+    .attr("transform", d => `translate(${d.y},${d.x})`).attr("tabindex", 0).attr("role", "button")
+    .attr("aria-label", d => `${d.data.label}${d.data.all.length ? `, ${d.data.all.length} inside` : ""}`);
+  const folded = d => !treeQuery.trim() && treeCollapsed?.has(d.data.id) && d.data.all.length;
+  nodes.append("circle").attr("r", d => d.depth === 0 ? 10 : d.depth === 1 || d.data.kind === "pillar" ? 7 : 5)
+    .attr("fill", d => folded(d) || d.depth === 0 ? nodeColor(d.data) : "var(--surface)").attr("stroke", d => nodeColor(d.data)).attr("stroke-width", 2.5);
+  const label = nodes.append("text").attr("x", d => d.depth === 0 ? 16 : 11).attr("dy", "0.33em");
+  label.append("tspan").text(d => { const t = String(d.data.label || "Untitled"); return t.length > 44 ? t.slice(0, 42) + "…" : t; });
+  label.filter(folded).append("tspan").attr("class", "more").text(d => `  +${d.data.all.length}`);
+  nodes.on("click", (e, d) => {
+    if (e.target.tagName === "circle" && d.data.all.length && d.depth > 0) toggleNode(d.data.id);
+    else selectNode(d.data.id === "root" ? null : d.data.id, d3.zoomTransform(svg.node()).k < 0.55);
+  }).on("keydown", (e, d) => {
+    if (e.key === "Enter") { e.preventDefault(); selectNode(d.data.id === "root" ? null : d.data.id); }
+    else if (e.key === " " && d.depth > 0) { e.preventDefault(); toggleNode(d.data.id); }
+  });
+  if (!treeFitted) { fitTree(root); treeFitted = true; }
+}
+function fitTree(root) {
+  const el = $("#tree-map"); if (!el || !treeZoom) return;
+  if (!root) { root = d3.hierarchy(treeData(), visibleKids); d3.tree().nodeSize([30, 250])(root); }
+  let x0 = Infinity, x1 = -Infinity, y1 = 0; root.each(d => { x0 = Math.min(x0, d.x); x1 = Math.max(x1, d.x); y1 = Math.max(y1, d.y); });
+  const w = el.clientWidth, h = el.clientHeight, cw = y1 + 320, ch = x1 - x0 + 60;
+  const k = Math.min(1.1, w / cw, h / ch);
+  d3.select("#tree-map svg").call(treeZoom.transform, d3.zoomIdentity.translate(24, h / 2 - (x0 + x1) / 2 * k).scale(k));
+}
+function drawOutline(host) {
+  const data = treeData();
+  const item = n => {
+    const kids = visibleKids(n) || [], hasKids = n.all.length > 0, open = kids.length > 0;
+    return `<li><div class="ol-row">${hasKids && !treeQuery.trim() ? `<button class="ol-tog" data-ttog="${n.id}" aria-label="${open ? "Fold" : "Unfold"} ${esc(n.label)}" aria-expanded="${open}">${open ? "▾" : "▸"}</button>` : `<span class="ol-tog"></span>`}
+      <button class="ol-item${n.id === treeSel ? " sel" : ""}" data-tsel="${n.id}"><i class="dot" style="background:${nodeColor(n)}"></i><span class="lbl">${esc(n.label)}</span>${hasKids && !open ? `<span class="ct">${n.all.length}</span>` : ""}</button></div>
+      ${open ? `<ul class="outline">${kids.map(item).join("")}</ul>` : ""}</li>`;
+  };
+  host.innerHTML = `<div class="outline-box"><ul class="outline">${(visibleKids(data) || []).map(item).join("") || `<li class="muted">${treeQuery ? "Nothing matches that search." : "Your tree is empty. Add a branch to start."}</li>`}</ul></div>`;
+}
+function focusNode(id) {
+  const svg = d3.select("#tree-map svg"), el = $("#tree-map"); if (svg.empty()) return;
+  const hit = svg.selectAll(".tn").filter(d => d.data.id === id); if (hit.empty()) return;
+  const d = hit.datum(), k = Math.max(d3.zoomTransform(svg.node()).k, 0.95);
+  svg.transition().duration(matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 350)
+    .call(treeZoom.transform, d3.zoomIdentity.translate(el.clientWidth * 0.32 - d.y * k, el.clientHeight / 2 - d.x * k).scale(k));
+}
+function toggleNode(id) { treeCollapsed ||= new Set(); treeCollapsed.has(id) ? treeCollapsed.delete(id) : treeCollapsed.add(id); saveTreeUi(); drawTree(); }
+function selectNode(id, focus) {
+  treeSel = id;
+  if (id) ancestors(byId(id)).forEach(a => treeCollapsed?.delete(a.id));
+  drawTree(); renderTreeEditor();
+  if (id && focus && treeMode === "map" && window.d3) focusNode(id);
+  if (id && innerWidth <= 900) $("#tree-edit")?.scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" });
+}
+function renderTreeEditor() {
+  const el = $("#tree-edit"); if (!el) return;
+  const n = byId(treeSel);
+  if (!n) {
+    el.innerHTML = `<h3 style="font-size:22px">Grow the tree</h3>
+      <p class="muted" style="margin:0">Tap any label to edit it, add ideas under it, or turn it into a post. Tap a dot to fold or unfold a branch.</p>
+      <p class="muted" style="margin:0">${tree.length} items so far: ${tree.filter(x => x.kind === "idea").length} content ideas, ${tree.filter(x => ["person", "brand", "resource"].includes(x.kind)).length} inspiration sources.</p>
+      <button class="btn primary" id="tree-addtop2">+ New top-level branch</button>`;
+    return;
+  }
+  const below = descendants(n.id).length, path = ancestors(n).map(a => a.label);
+  const banned = new Set([n.id, ...descendants(n.id).map(x => x.id)]);
+  const targets = tree.filter(x => !banned.has(x.id) && x.id !== n.parent).map(x => ({ x, path: [...ancestors(x).map(a => a.label), x.label].join(" › ") })).sort((a, b) => a.path.localeCompare(b.path));
+  el.innerHTML = `
+    <p class="crumb">${esc([settings.brandName || "Brand", ...path].join(" › "))}</p>
+    <label class="f" for="tn-label">Label<input type="text" id="tn-label" value="${esc(n.label)}"></label>
+    <div class="grid3" style="grid-template-columns:repeat(2,minmax(0,1fr))">
+      <label class="f" for="tn-kind">Type<select id="tn-kind">${Object.entries(KINDS).map(([k, [l]]) => `<option value="${k}"${k === n.kind ? " selected" : ""}>${l}</option>`).join("")}</select></label>
+      <label class="f" for="tn-pillar">Pillar<select id="tn-pillar"><option value="">${nodePillar({ ...n, pillar: null }) ? "Inherited: " + esc(P[nodePillar({ ...n, pillar: null })].short) : "None"}</option>${PILLARS.map(p => `<option value="${p.n}"${Number(n.pillar) === p.n ? " selected" : ""}>${esc(p.short)}</option>`).join("")}</select></label>
+    </div>
+    <label class="f" for="tn-note">Notes<textarea id="tn-note" rows="4" placeholder="Why it matters, a story, a quote, what to say">${esc(n.note || "")}</textarea></label>
+    <label class="f" for="tn-url">Link<input type="text" id="tn-url" value="${esc(n.url || "")}" placeholder="https:// a profile, video, or article"></label>
+    ${/^https?:\/\//.test(n.url || "") ? `<a href="${esc(n.url)}" target="_blank" rel="noopener" style="font-size:13px;color:var(--pine);font-weight:600">Open link ↗</a>` : ""}
+    <div class="row"><button class="btn primary small" id="tn-child">+ Add inside</button><button class="btn small" id="tn-sib">+ Add next to</button>
+      <button class="btn small" id="tn-up" aria-label="Move up">↑</button><button class="btn small" id="tn-down" aria-label="Move down">↓</button></div>
+    <label class="f" for="tn-move">Move to<select id="tn-move"><option value="">Choose a new parent…</option><option value="__top">Top level</option>${targets.map(t => `<option value="${t.x.id}">${esc(t.path)}</option>`).join("")}</select></label>
+    <div class="row"><button class="btn sun small" id="tn-draft" ${sampleFn ? "" : "disabled"}>Draft a post from this</button>${n.postId && posts.some(p => p.id === n.postId) ? `<button class="btn small" id="tn-open">Open its post</button>` : ""}</div>
+    <div class="row" style="justify-content:space-between"><span class="saved" id="tn-saved">Saved</span><button class="btn ghost small danger" id="tn-del">Delete${below ? ` + ${below} inside` : ""}</button></div>
+    <div id="tn-delconfirm" hidden class="note">Delete “${esc(n.label)}”${below ? ` and the ${below} items inside it` : ""}? <button class="btn small danger" id="tn-delyes">Delete</button> <button class="btn small ghost" id="tn-delno">Keep</button></div>`;
+}
+let nodeTimer = null;
+function queueNodeSave(n, redraw) {
+  const s = $("#tn-saved"); if (s) s.textContent = "Saving…";
+  clearTimeout(nodeTimer);
+  nodeTimer = setTimeout(async () => {
+    try { await store.saveNode(structuredClone(n)); const s2 = $("#tn-saved"); if (s2) s2.textContent = "Saved"; }
+    catch { const s2 = $("#tn-saved"); if (s2) s2.textContent = "Not saved. Check your connection."; }
+    if (redraw) drawTree();
+  }, 500);
+}
+function childKind(parent) {
+  if (!parent) return "branch";
+  if (parent.kind === "pillar") return "idea";
+  const sib = tree.find(x => x.parent === parent.id);
+  return sib?.kind || (parent.kind === "branch" ? "topic" : parent.kind === "topic" ? "idea" : parent.kind);
+}
+async function addNode(parentId, afterOrder) {
+  const parent = parentId ? byId(parentId) : null, sibs = tree.filter(x => (x.parent || null) === (parentId || null));
+  const order = afterOrder ?? (sibs.reduce((m, x) => Math.max(m, x.order ?? 0), 0) + 1);
+  const n = { id: uid().replace("p", "n"), parent: parentId || null, label: parent ? "New idea" : "New branch", kind: childKind(parent), note: "", url: "", order };
+  if (parentId) treeCollapsed?.delete(parentId);
+  treeSel = n.id; saveTreeUi();
+  try { await store.saveNode(n); } catch { toast("Couldn't add it. You may have view-only access."); return; }
+  if (storeMode !== "db") { tree = tree.some(x => x.id === n.id) ? tree : [...tree, n]; }
+  drawTree(); renderTreeEditor();
+  const inp = $("#tn-label"); if (inp) { inp.focus(); inp.select(); }
+}
+const tv = $("#v-tree");
+tv.addEventListener("input", e => {
+  const t = e.target, n = byId(treeSel);
+  if (t.id === "tree-q") { treeQuery = t.value; treeFitted = !treeQuery ? false : treeFitted; drawTree(); return; }
+  if (!n) return;
+  if (t.id === "tn-label") { n.label = t.value; queueNodeSave(n, true); }
+  else if (t.id === "tn-note") { n.note = t.value; queueNodeSave(n); }
+  else if (t.id === "tn-url") { n.url = t.value.trim(); queueNodeSave(n); }
+});
+tv.addEventListener("change", async e => {
+  const t = e.target, n = byId(treeSel); if (!n) return;
+  if (t.id === "tn-kind") { n.kind = t.value; queueNodeSave(n, true); }
+  else if (t.id === "tn-pillar") { n.pillar = t.value ? Number(t.value) : null; queueNodeSave(n, true); }
+  else if (t.id === "tn-move" && t.value) {
+    n.parent = t.value === "__top" ? null : t.value; n.order = tree.filter(x => x.parent === n.parent).reduce((m, x) => Math.max(m, x.order ?? 0), 0) + 1;
+    if (n.parent) treeCollapsed?.delete(n.parent);
+    await store.saveNode(structuredClone(n)); toast("Moved"); drawTree(); renderTreeEditor();
+  }
+});
+tv.addEventListener("click", async e => {
+  const b = e.target.closest("button"); if (!b) return;
+  const n = byId(treeSel);
+  if (b.dataset.tmode) { treeMode = b.dataset.tmode; saveTreeUi(); renderTree(); }
+  else if (b.dataset.ttog) toggleNode(b.dataset.ttog);
+  else if (b.dataset.tsel) selectNode(b.dataset.tsel === "root" ? null : b.dataset.tsel);
+  else if (b.id === "tree-expand") { treeCollapsed = new Set(); saveTreeUi(); treeFitted = false; drawTree(); }
+  else if (b.id === "tree-collapse") { treeCollapsed = new Set(tree.filter(x => tree.some(c => c.parent === x.id)).map(x => x.id)); saveTreeUi(); treeFitted = false; drawTree(); }
+  else if (b.id === "tree-addtop" || b.id === "tree-addtop2") addNode(null);
+  else if (b.id === "tree-fit") fitTree();
+  else if (b.id === "tree-zin" || b.id === "tree-zout") d3.select("#tree-map svg").transition().duration(200).call(treeZoom.scaleBy, b.id === "tree-zin" ? 1.3 : 1 / 1.3);
+  else if (!n) return;
+  else if (b.id === "tn-child") addNode(n.id);
+  else if (b.id === "tn-sib") addNode(n.parent, (n.order ?? 0) + 0.5);
+  else if (b.id === "tn-up" || b.id === "tn-down") {
+    const sibs = tree.filter(x => (x.parent || null) === (n.parent || null)).sort((a, c) => (a.order ?? 0) - (c.order ?? 0));
+    const i = sibs.indexOf(n), j = i + (b.id === "tn-up" ? -1 : 1); if (!sibs[j]) return;
+    [sibs[i], sibs[j]] = [sibs[j], sibs[i]];
+    for (let k = 0; k < sibs.length; k++) if (sibs[k].order !== k + 1) { sibs[k].order = k + 1; await store.saveNode(structuredClone(sibs[k])); }
+    drawTree();
+  }
+  else if (b.id === "tn-draft") {
+    genState = { ...genState, pillar: nodePillar(n) || genState.pillar, angle: n.label + (n.note ? `\n${n.note}` : ""), date: nextEmptyDate(), result: null, error: "" };
+    go("generate");
+  }
+  else if (b.id === "tn-open") { selectedId = n.postId; draft = null; go("studio"); }
+  else if (b.id === "tn-del") $("#tn-delconfirm").hidden = false;
+  else if (b.id === "tn-delno") $("#tn-delconfirm").hidden = true;
+  else if (b.id === "tn-delyes") {
+    const all = [...descendants(n.id).reverse(), n]; treeSel = n.parent || null;
+    try { for (const x of all) await store.removeNode(x.id); toast(`Deleted ${all.length} item${all.length > 1 ? "s" : ""}`); }
+    catch { toast("Couldn't delete. You may have view-only access."); }
+    drawTree(); renderTreeEditor();
+  }
+});
+tv.addEventListener("keydown", e => {
+  if (e.target.id !== "tree-q" || e.key !== "Enter") return;
+  const q = treeQuery.trim().toLowerCase(); if (!q) return;
+  const hit = tree.find(n => `${n.label} ${n.note || ""}`.toLowerCase().includes(q));
+  if (hit) selectNode(hit.id, true); else toast("Nothing matches that search");
+});
+window.addEventListener("resize", () => { if (view === "tree" && treeMode === "map") { treeFitted = false; drawTree(); } });
 
 /* ---------- Boot ---------- */
 renderPlaybook();

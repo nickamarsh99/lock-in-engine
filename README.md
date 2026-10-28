@@ -28,7 +28,7 @@ python3 -m lockin.edit raw.mov --script script.txt --pillar 2 --handle @you --ou
 
 Outputs `final.mp4` (1080×1920, H.264, -14 LUFS) and `final.srt`.
 
-**Captions** use [faster-whisper](https://pypi.org/project/faster-whisper/) word timestamps when it's installed and its model can download (needs `huggingface.co` allowed in the environment's network settings). Without it, captions are timed from the script, which tracks a straight teleprompter read but drifts on ad-libs.
+**Captions** use [faster-whisper](https://pypi.org/project/faster-whisper/) word timestamps when it's installed and its model can download (needs `huggingface.co` and `*.hf.co` allowed in the environment's network settings). Without it, captions are timed from the script, which tracks a straight teleprompter read but drifts on ad-libs.
 
 ## Post kit
 
@@ -47,7 +47,17 @@ npm install
 
 Needs `ffmpeg`. Fonts are in `brand/fonts` (SIL Open Font License).
 
-## Not automated yet
+## Raw clips from Google Drive
 
-- **Raw clips in:** needs Google Drive API access (a service-account key as an environment secret, with your clip folder shared to it). The Drive connector can't move video files.
-- **Posting:** manual for now by choice. Upgrade path: a unified posting API (one key for IG, TikTok drafts, YT, X) or the official APIs.
+Drop clips into the **Lock-In Raw** Drive folder, named with the post date first (`2026-10-29.mov`). A read-only service account pulls them:
+
+```bash
+python3 -m lockin.drive list
+python3 -m lockin.drive pull --skip-ids processed.txt --out inbox
+```
+
+Needs `GDRIVE_SA_JSON` and `GDRIVE_RAW_FOLDER_ID` in the environment. Finished videos go back through the engine page (its asset store), not Drive, because service accounts can't own files in a personal Drive. The daily run is in `docs/daily-run.md`.
+
+## Not automated
+
+- **Posting:** manual by choice. Upgrade path: a unified posting API (one key for IG, TikTok drafts, YT, X) or the official APIs.

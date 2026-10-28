@@ -83,6 +83,7 @@ def main(argv=None):
     ap.add_argument("--no-cut", action="store_true", help="keep pauses")
     ap.add_argument("--whisper-model", default="base.en")
     ap.add_argument("--noise", default="-34dB", help="silence threshold; raise toward -30dB in noisy rooms")
+    ap.add_argument("--max-mb", type=float, default=14, help="cap the file size so it fits the engine page (0 = no cap)")
     ap.add_argument("--out")
     a = ap.parse_args(argv)
 
@@ -116,13 +117,19 @@ def main(argv=None):
         card = end_card(tmp / "card.png", a.handle, theme, line=a.end_line)
 
         print("4/4 render")
+        # Cap the bitrate so the file fits the engine's 15 MB upload limit. Platforms recompress anyway.
+        total = probe(tmp / "cut.mp4")[0] + 2.2
+        cap = []
+        if a.max_mb:
+            kbps = max(900, int(a.max_mb * 8192 / total) - 200)
+            cap = ["-maxrate", f"{kbps}k", "-bufsize", f"{kbps * 2}k"]
         fc = (f"[0:v]ass={ass}:fontsdir={FONTS},format=yuv420p[v0];"
               f"[0:a]loudnorm=I=-14:TP=-1.5:LRA=11,aresample=48000[a0];"
               f"[1:v]scale=1080:1920,setsar=1,fps=30,format=yuv420p,fade=in:st=0:d=0.3[v1];"
               f"[v0][a0][v1][2:a]concat=n=2:v=1:a=1[v][a]")
         run(["ffmpeg", "-y", "-hide_banner", "-i", str(tmp / "cut.mp4"), "-loop", "1", "-t", "2.2", "-i", str(card),
              "-f", "lavfi", "-t", "2.2", "-i", "anullsrc=r=48000:cl=stereo", "-filter_complex", fc,
-             "-map", "[v]", "-map", "[a]", "-c:v", "libx264", "-preset", "medium", "-crf", "19", "-pix_fmt", "yuv420p",
+             "-map", "[v]", "-map", "[a]", "-c:v", "libx264", "-preset", "medium", "-crf", "19", *cap, "-pix_fmt", "yuv420p",
              "-c:a", "aac", "-b:a", "192k", "-movflags", "+faststart", str(out)])
     print(f"done: {out}  ({probe(out)[0]:.1f}s)")
     return out

@@ -1,5 +1,7 @@
 """Word timings (Whisper when available, the teleprompter script otherwise) and brand-styled ASS captions."""
 import re
+import subprocess
+import sys
 
 from .brand import BRAND
 
@@ -9,6 +11,13 @@ def whisper_words(audio_path, model="base.en"):
     try:
         from faster_whisper import WhisperModel
     except ImportError:
+        return None
+    # Fetch the model in a child process with a deadline: a blocked network otherwise retries for minutes.
+    fetch = f"from faster_whisper.utils import download_model; download_model({model!r})"
+    try:
+        subprocess.run([sys.executable, "-c", fetch], check=True, timeout=300, capture_output=True)
+    except (subprocess.CalledProcessError, subprocess.TimeoutExpired):
+        print("  whisper model couldn't download (allow huggingface.co and *.hf.co); using script timing")
         return None
     try:
         m = WhisperModel(model, device="cpu", compute_type="int8")
