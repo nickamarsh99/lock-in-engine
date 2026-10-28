@@ -1,0 +1,1199 @@
+<title>Lock-In Content Engine</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Barlow:wght@400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400;1,6..72,500&display=swap">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<style>
+/* Layout: a working desk. Sticky top bar with sprint progress, four views (Sprint, Studio, Generate, Playbook), single column on phones. */
+:root {
+  --bg: #F2F3EE; --surface: #FFFFFF; --ink: #17231D; --muted: #5B6860; --line: #D9DED4;
+  --pine: #2C5843; --pine-ink: #FFFFFF; --sun: #B98219; --sun-soft: #F4E6C6; --danger: #A8402F;
+  --p1: #8A6AAE; --p2: #D19A2E; --p3: #4F9764; --p4: #C46B49; --p5: #4B79B3; --p6: #379C98; --p7: #BC5A82; --p8: #76818E;
+  --f-display: "Barlow Condensed", "Arial Narrow", "Roboto Condensed", sans-serif;
+  --f-ui: "Barlow", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-serif: "Newsreader", Georgia, "Times New Roman", serif;
+  --r: 10px;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0F1612; --surface: #17201B; --ink: #E7ECE4; --muted: #98A69D; --line: #29352E;
+  --pine: #86BC9F; --pine-ink: #0F1612; --sun: #E2B04C; --sun-soft: #3A3019; --danger: #E2816E; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #0F1612; --surface: #17201B; --ink: #E7ECE4; --muted: #98A69D; --line: #29352E;
+  --pine: #86BC9F; --pine-ink: #0F1612; --sun: #E2B04C; --sun-soft: #3A3019; --danger: #E2816E; color-scheme: dark }
+
+* { box-sizing: border-box }
+[hidden] { display: none !important }
+body { background: var(--bg); color: var(--ink); font-family: var(--f-ui); font-size: 15px; line-height: 1.5; margin: 0 }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--bg) }
+button, input, select, textarea { font: inherit; color: inherit }
+button { cursor: pointer }
+:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px }
+h1, h2, h3 { font-family: var(--f-display); font-weight: 800; text-transform: uppercase; letter-spacing: .01em; line-height: 1; margin: 0; text-wrap: balance }
+.wrap { max-width: 1180px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)) }
+
+/* Top bar */
+.top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--bg); border-bottom: 1px solid var(--line) }
+.top .wrap { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 20px; padding-block: 12px }
+.brand { display: flex; align-items: center; gap: 10px; margin-right: auto }
+.sunmark { width: 26px; height: 26px; border-radius: 50%; background: var(--sun); box-shadow: inset 0 -9px 0 0 var(--pine) }
+.brand h1 { font-size: 24px }
+.brand small { display: block; font-size: 12px; color: var(--muted); font-weight: 500; letter-spacing: .02em }
+nav { display: flex; gap: 4px; overflow-x: auto; max-width: 100% }
+nav a { text-decoration: none; color: var(--muted); font-weight: 600; padding: 7px 12px; border-radius: 999px; white-space: nowrap }
+nav a[aria-current="page"] { background: var(--ink); color: var(--bg) }
+.daybadge { font-family: var(--f-display); font-weight: 700; font-size: 18px; letter-spacing: .03em; white-space: nowrap }
+.daybadge b { color: var(--sun) }
+
+main { padding-block: 22px 60px }
+.view { display: grid; gap: 22px }
+.eyebrow { font-size: 12px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--muted) }
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 18px }
+.row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center }
+.muted { color: var(--muted) }
+.serif { font-family: var(--f-serif) }
+
+/* Buttons and inputs */
+.btn { border: 1px solid var(--line); background: var(--surface); border-radius: 8px; padding: 8px 14px; font-weight: 600 }
+.btn:hover { border-color: var(--ink) }
+.btn.primary { background: var(--pine); color: var(--pine-ink); border-color: var(--pine) }
+.btn.sun { background: var(--sun); color: #17231D; border-color: var(--sun) }
+.btn.ghost { background: transparent }
+.btn.small { padding: 4px 10px; font-size: 13px }
+.btn.danger { color: var(--danger) }
+.btn:disabled { opacity: .5; cursor: default }
+label.f { display: grid; gap: 4px; font-size: 13px; font-weight: 600; color: var(--muted) }
+input[type=text], input[type=date], input[type=number], select, textarea {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; width: 100%; min-width: 0 }
+textarea { resize: vertical; line-height: 1.45 }
+.chip { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; padding: 2px 9px; border-radius: 999px; border: 1px solid var(--line); white-space: nowrap }
+.dot { width: 9px; height: 9px; border-radius: 50%; flex: none }
+.status { font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; padding: 2px 7px; border-radius: 4px }
+.st-idea { color: var(--muted); border: 1px dashed var(--muted) }
+.st-drafted { background: var(--sun-soft); color: var(--ink) }
+.st-ready { background: var(--pine); color: var(--pine-ink) }
+.st-posted { background: var(--ink); color: var(--bg) }
+
+/* Sprint */
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px }
+.stat { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 14px 16px }
+.stat .n { font-family: var(--f-display); font-weight: 800; font-size: 40px; line-height: 1; font-variant-numeric: tabular-nums }
+.stat .n small { font-size: 20px; color: var(--muted); font-weight: 600 }
+.meter { height: 6px; background: var(--line); border-radius: 3px; margin-top: 10px; overflow: hidden }
+.meter i { display: block; height: 100%; background: var(--sun) }
+.two { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); gap: 22px; align-items: start }
+@media (max-width: 860px) { .two { grid-template-columns: minmax(0, 1fr) } }
+.cal { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 6px }
+.cal .dow { font-size: 11px; font-weight: 700; letter-spacing: .1em; color: var(--muted); text-align: center; text-transform: uppercase }
+.cell { min-height: 92px; border: 1px solid var(--line); border-radius: 8px; padding: 6px; background: var(--surface); display: flex; flex-direction: column; gap: 4px; text-align: left; min-width: 0 }
+.cell.out { background: transparent; border-style: dashed; opacity: .45 }
+.cell.today { border-color: var(--sun); box-shadow: 0 0 0 1px var(--sun) }
+.cell .d { font-size: 11px; font-weight: 700; color: var(--muted); font-variant-numeric: tabular-nums; display: flex; justify-content: space-between; gap: 4px }
+.cell .t { font-size: 12.5px; font-weight: 600; line-height: 1.25; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow-wrap: anywhere }
+.cell.has { cursor: pointer; border-left-width: 4px }
+.cell.has:hover { border-color: var(--ink) }
+.cell .add { margin-top: auto; font-size: 12px; color: var(--muted); background: none; border: 1px dashed var(--line); border-radius: 6px; padding: 3px }
+.cell .add:hover { color: var(--ink); border-color: var(--ink) }
+@media (max-width: 620px) {
+  .cal { grid-template-columns: minmax(0, 1fr) } .cal .dow { display: none } .cell.out { display: none }
+  .cell { min-height: 0; flex-direction: row; align-items: center; gap: 10px } .cell .t { flex: 1 } .cell .add { margin: 0 0 0 auto; padding: 3px 10px }
+}
+.mix { display: grid; gap: 9px }
+.mix .m { display: grid; grid-template-columns: 112px minmax(0, 1fr) 70px; gap: 10px; align-items: center; font-size: 13px }
+.mix .bar { position: relative; height: 10px; background: var(--bg); border-radius: 5px; border: 1px solid var(--line) }
+.mix .bar i { position: absolute; inset: 0 auto 0 0; border-radius: 5px }
+.mix .bar b { position: absolute; top: -4px; bottom: -4px; width: 2px; background: var(--ink) }
+.mix .v { text-align: right; font-variant-numeric: tabular-nums; color: var(--muted) }
+.cadence { display: grid; gap: 10px }
+.cadence div { display: grid; grid-template-columns: 92px minmax(0, 1fr); gap: 10px; font-size: 14px }
+.cadence b { font-family: var(--f-display); text-transform: uppercase; font-size: 16px; letter-spacing: .03em }
+.toplist { display: grid; gap: 8px; margin: 0; padding: 0; list-style: none }
+.toplist li { display: flex; gap: 10px; align-items: baseline; justify-content: space-between; font-size: 14px; border-bottom: 1px solid var(--line); padding-bottom: 6px }
+.toplist span:last-child { font-variant-numeric: tabular-nums; color: var(--muted); white-space: nowrap }
+
+/* Studio */
+.studio-head { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; align-items: end }
+.editor { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 22px; align-items: start }
+@media (max-width: 900px) { .editor { grid-template-columns: minmax(0, 1fr) } }
+.fields { display: grid; gap: 14px }
+.grid3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px }
+@media (max-width: 520px) { .grid3 { grid-template-columns: minmax(0, 1fr) } }
+.slide-ed { display: grid; grid-template-columns: 34px minmax(0, 1fr) auto; gap: 8px; align-items: start; padding: 10px 0; border-top: 1px solid var(--line) }
+.slide-ed .num { font-family: var(--f-display); font-weight: 800; font-size: 22px; color: var(--sun); padding-top: 4px }
+.slide-ed .stack { display: grid; gap: 6px }
+.slide-ed .ops { display: grid; gap: 4px }
+.slide-ed .ops button { border: 1px solid var(--line); background: var(--surface); border-radius: 6px; width: 30px; height: 26px; font-size: 13px; line-height: 1 }
+.previews { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 8px; scroll-snap-type: x mandatory }
+.previews figure { margin: 0; flex: none; width: 210px; scroll-snap-align: start; display: grid; gap: 4px }
+.previews canvas, .previews img { width: 100%; height: auto; border-radius: 6px; display: block; border: 1px solid var(--line); aspect-ratio: 4 / 5 }
+.previews figcaption { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted) }
+.previews figcaption button { border: none; background: none; color: var(--pine); font-weight: 600; font-size: 12px; padding: 0 }
+.themes { display: flex; gap: 6px }
+.themes button { width: 30px; height: 30px; border-radius: 50%; border: 2px solid var(--line) }
+.themes button[aria-pressed="true"] { border-color: var(--ink); box-shadow: 0 0 0 2px var(--bg) inset }
+.out-block { display: grid; gap: 6px }
+.out-block .row { justify-content: space-between }
+.count { font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums }
+.count.over { color: var(--danger); font-weight: 700 }
+.checks { display: flex; flex-wrap: wrap; gap: 6px }
+.checks label { display: inline-flex; gap: 6px; align-items: center; font-size: 13px; border: 1px solid var(--line); border-radius: 999px; padding: 4px 10px; cursor: pointer }
+.checks input { accent-color: var(--pine) }
+.metrics { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px }
+@media (max-width: 520px) { .metrics { grid-template-columns: repeat(2, minmax(0, 1fr)) } }
+.saved { font-size: 12px; color: var(--muted) }
+.hooks { display: grid; gap: 6px; margin-top: 6px }
+.hooks button { text-align: left; border: 1px solid var(--line); background: var(--bg); border-radius: 8px; padding: 8px 10px; font-weight: 600 }
+.hooks button:hover { border-color: var(--pine) }
+.empty { text-align: center; padding: 40px 16px; color: var(--muted) }
+.empty h2 { color: var(--ink); font-size: 30px; margin-bottom: 8px }
+
+/* Generate */
+.gen { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr); gap: 22px; align-items: start }
+@media (max-width: 900px) { .gen { grid-template-columns: minmax(0, 1fr) } }
+.angles { display: flex; flex-wrap: wrap; gap: 6px }
+.angles button { border: 1px solid var(--line); background: var(--bg); border-radius: 999px; padding: 4px 11px; font-size: 13px; text-align: left }
+.angles button:hover { border-color: var(--pine); color: var(--pine) }
+.result h3 { font-size: 26px; margin-bottom: 4px }
+.result ol { margin: 8px 0 0; padding-left: 22px; display: grid; gap: 8px }
+.result ol li b { display: block }
+.stream { font-family: var(--f-serif); white-space: pre-wrap; color: var(--muted); max-height: 260px; overflow: auto; font-size: 14px }
+.note { font-size: 13px; color: var(--muted); border-left: 3px solid var(--sun); padding: 2px 0 2px 10px }
+.err { color: var(--danger); font-weight: 600 }
+
+/* Playbook */
+.pb { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px }
+.pb h2 { font-size: 26px; margin-bottom: 10px }
+.pb ul, .pb ol { margin: 0; padding-left: 20px; display: grid; gap: 7px }
+.pb p { margin: 0 0 10px }
+.thesis { font-family: var(--f-serif); font-size: clamp(22px, 3.4vw, 34px); line-height: 1.25; max-width: 32ch; margin: 0 }
+.thesis em { color: var(--sun) }
+.lesson b { display: block }
+.grid4 { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px }
+@media (max-width: 620px) { .grid4 { grid-template-columns: repeat(2, minmax(0, 1fr)) } }
+.themes { flex-wrap: wrap; align-items: center }
+.themes button.auto { width: auto; border-radius: 999px; padding: 0 12px; font-size: 13px; font-weight: 700; background: var(--bg) }
+
+/* Teleprompter: deliberately one dark look, it's a filming tool held near a lens */
+.prompter { position: fixed; inset: 0; z-index: 30; background: #0C0A09; color: #FFF4E6; display: grid; grid-template-rows: minmax(0, 1fr) auto }
+.pr-scroll { overflow-y: auto; padding: 20vh max(20px, env(safe-area-inset-right, 0px)) 70vh max(20px, env(safe-area-inset-left, 0px)); scrollbar-width: none; cursor: pointer }
+.pr-scroll::-webkit-scrollbar { display: none }
+.pr-text { max-width: 30ch; margin: 0 auto; font-family: var(--f-ui); font-weight: 600; line-height: 1.32; font-size: var(--pr-size, 40px) }
+.pr-text p { margin: 0 0 .7em }
+.pr-text .cue { font-size: .5em; color: #F2A35E; letter-spacing: .06em; text-transform: uppercase; font-weight: 700 }
+.pr-text .lbl { display: block; font-size: .42em; color: #F2A35E; letter-spacing: .14em; text-transform: uppercase; font-weight: 700 }
+.prompter.mirror .pr-text { transform: scaleX(-1) }
+.pr-line { position: fixed; left: 0; right: 0; top: 20vh; height: 2px; background: linear-gradient(90deg, transparent, rgba(242,163,94,.7), transparent); pointer-events: none }
+.pr-count { position: fixed; inset: 0; display: grid; place-items: center; font-family: var(--f-display); font-weight: 800; font-size: 30vh; color: #F2A35E; pointer-events: none }
+.pr-bar { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; align-items: center; padding: 10px max(12px, env(safe-area-inset-right, 0px)) calc(10px + env(safe-area-inset-bottom, 0px)) max(12px, env(safe-area-inset-left, 0px)); background: #1A1512; border-top: 1px solid #2E2620; font-size: 14px }
+.pr-bar button { background: #2A221D; color: #FFF4E6; border: 1px solid #3A2F27; border-radius: 8px; padding: 7px 12px; font-weight: 700; min-width: 40px }
+.pr-bar button.go { background: #F2A35E; color: #1A1512; border-color: #F2A35E; min-width: 86px }
+.pr-bar button[aria-pressed="true"] { border-color: #F2A35E; color: #F2A35E }
+.pr-bar .grp { display: inline-flex; gap: 4px; align-items: center; color: #BFAF9F }
+.toast { position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--ink); color: var(--bg); padding: 9px 16px; border-radius: 999px; font-weight: 600; font-size: 14px; z-index: 20 }
+@media (prefers-reduced-motion: no-preference) { .toast { animation: rise .2s ease-out } @keyframes rise { from { transform: translate(-50%, 8px); opacity: 0 } } }
+</style>
+
+<header class="top">
+  <div class="wrap">
+    <div class="brand"><span class="sunmark" aria-hidden="true"></span><div><h1>Lock-In Engine</h1><small>One idea a day. Six placements. Thirty days.</small></div></div>
+    <span class="daybadge" id="daybadge"></span>
+    <nav aria-label="Views">
+      <a href="#sprint" data-v="sprint">Sprint</a>
+      <a href="#studio" data-v="studio">Studio</a>
+      <a href="#generate" data-v="generate">Generate</a>
+      <a href="#playbook" data-v="playbook">Playbook</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="view" id="v-sprint"></section>
+  <section class="view" id="v-studio" hidden></section>
+  <section class="view" id="v-generate" hidden></section>
+  <section class="view" id="v-playbook" hidden></section>
+</main>
+<div id="toast" class="toast" hidden></div>
+<div id="prompter" class="prompter" hidden role="dialog" aria-label="Teleprompter">
+  <div class="pr-scroll" id="pr-scroll"><div class="pr-text" id="pr-text"></div></div>
+  <div class="pr-line" aria-hidden="true"></div>
+  <div class="pr-count" id="pr-count" hidden></div>
+  <div class="pr-bar">
+    <button class="go" id="pr-play">Start</button>
+    <span class="grp">Speed <button data-pr="speed,-1" aria-label="Slower">−</button><b id="pr-speed">3</b><button data-pr="speed,1" aria-label="Faster">+</button></span>
+    <span class="grp">Text <button data-pr="size,-1" aria-label="Smaller text">A−</button><button data-pr="size,1" aria-label="Larger text">A+</button></span>
+    <button id="pr-mirror" aria-pressed="false">Mirror</button>
+    <button id="pr-restart">Restart</button>
+    <button id="pr-close">Done</button>
+  </div>
+</div>
+
+<script>
+/* ---------- Brand brain (from the Brand & Content Pillars doc) ---------- */
+const PILLARS = [
+  { n: 1, name: "Faithful Formation", short: "Faith", target: 8,
+    purpose: "Keep Jesus and biblical truth as the foundation beneath every health, family, and work conversation.",
+    subs: ["Scripture, Bible study, theology, church history", "Prayer, worship, obedience, spiritual disciplines", "Church life, serving, Christian community", "Discernment and apologetics", "Humility, repentance, grace", "Faith in ordinary life: work, meals, fitness, stress", "Testimonies and what God is teaching me"],
+    angles: ["What this Scripture changes about anxiety and health", "The difference between discipline and trying to earn God's love", "Why health can become an idol, even when the habits are good", "A lesson from church history that corrects modern self-help culture"] },
+  { n: 2, name: "Circadian & Foundational Health", short: "Rhythms", target: 17,
+    purpose: "Own the created-rhythms lane: light, sleep, rest, routine, and basics before complicated protocols.",
+    subs: ["Morning light and outdoor time", "Evening light, screens, wind-down", "Sleep quality and bedroom environment", "Daily movement and breaking up sitting", "Hydration, minerals, caffeine timing", "Stress, overstimulation, rest", "Seasonal rhythms and Sabbath rest", "Basics over protocol overload"],
+    angles: ["The first hour of your day sets up your sleep tonight", "Sunlight before screens: the habit I'm protecting", "Tired all day and wired at night? Start with these basics", "You probably don't need another supplement before you fix your sleep"] },
+  { n: 3, name: "Gut Health & Real-Food Nutrition", short: "Gut & Food", target: 20,
+    purpose: "Be a trusted practical voice for digestion, whole foods, nutrient density, metabolism, and sustainable eating.",
+    subs: ["Digestion, bloating, regularity", "Gut-skin, inflammation, energy, mood", "High-protein, nutrient-dense eating", "Whole foods and food-quality literacy", "Metabolic health and walking after meals", "Ingredient comparisons and label-reading", "Food freedom over fear", "Supplements as secondary tools"],
+    angles: ["The high-protein breakfast that's easier on my digestion", "Three gut-health foundations before buying another supplement", "What I look for on a food label, and what I ignore", "Healthy eating should make family meals easier, not scarier"] },
+  { n: 4, name: "The Faithful Table", short: "Table", target: 15,
+    purpose: "Food as lifestyle and visual identity: nourishment, beauty, gratitude, hospitality, shared life.",
+    subs: ["Whole-food recipes and meal prep", "High-protein meals and snacks", "Grocery hauls and pantry staples", "Cooking for family, friends, church", "Hosting and traditions", "Kitchen and market visuals", "Gratitude and prayer at the table", "Simple weekday cooking systems"],
+    angles: ["A simple dinner that makes healthy eating feel like real life", "The meal I make when friends are coming over", "Our Sunday prep routine for a less chaotic week", "Food is more than macros: it's how we gather, serve, and remember"] },
+  { n: 5, name: "Strength & Faithful Discipline", short: "Strength", target: 15,
+    purpose: "Fitness as capacity, responsibility, consistency, and service, not vanity.",
+    subs: ["Strength training and practical routines", "Walking, hiking, outdoor movement", "Mobility, posture, joints", "Athleticism and outdoor hobbies", "Consistency and doing hard things", "Recovery and rest days", "Fitness without vanity", "Energy for family, church, and service"],
+    angles: ["The point of training is not to be admired; it's to become useful", "A workout plan is only good if you'll still do it next month", "The most underrated fitness habit: a daily walk", "Train to have more energy for the people you love"] },
+  { n: 6, name: "Healthy Home & Wellness Discernment", short: "Home & Discernment", target: 13,
+    purpose: "The physical environment of health, plus a trustworthy filter for wellness products and claims.",
+    subs: ["Low-toxin practical home habits", "Cookware, storage, water, cleaning", "Sleep environment", "Personal-care and ingredient literacy", "Air and ventilation", "Supplement and product reviews", "Budget upgrades vs. expensive biohacking", "Reading studies and claims", "Transparent affiliate recommendations"],
+    angles: ["Before you buy a wellness device, ask these four questions", "The home-health upgrades I'd prioritize on a budget", "A low-toxin home shouldn't become a high-anxiety home", "Useful product or expensive wellness marketing? How to tell"] },
+  { n: 7, name: "Faithful Home & Community", short: "Community", target: 7,
+    purpose: "Health is for love, covenant, family, friendship, service, and a rooted local life.",
+    subs: ["Marriage and serving one another", "Intentional dating, preparing for marriage", "Preparing for parenthood", "Friendship and making time for people", "Hospitality and traditions", "Church community and accountability", "Honoring parents", "Digital boundaries and resisting isolation", "Forgiveness and peacemaking"],
+    angles: ["The healthiest habit in our week is dinner with people we love", "Don't wait for a perfect house to invite people over", "A strong marriage is built in ordinary moments", "Get off the feed and sit at a table with someone"] },
+  { n: 8, name: "Calling, Work & Kingdom Stewardship", short: "Calling", target: 5,
+    purpose: "Money, work, and influence as stewardship rather than identity.",
+    subs: ["Seeking a God-given calling", "Skill, creativity, craftsmanship", "Ethical entrepreneurship and honest marketing", "Content with integrity", "Income without worshiping money", "Tithing, generosity, financing Kingdom work", "Anti-scam, anti-black-hat", "Time stewardship and focused work"],
+    angles: ["You can pursue excellence without making achievement your god", "Building income without building my identity on money", "The kind of marketing I refuse to do, even if it converts", "Your calling may be less about being known and more about becoming useful"] },
+];
+const P = Object.fromEntries(PILLARS.map(p => [p.n, p]));
+const pColor = n => `var(--p${n})`;
+
+const PRODUCTS = ["NOBS", "Santa Cruz Medicinals (copper peptide tallow balm)", "Santa Cruz Medicinals (protein bars)", "Santa Cruz Medicinals (electrolytes)", "Outgoing Co", "Meraki Medicinal", "Equip Foods", "Heart & Soil", "Mayu", "Jacob protein bar", "Based Supps", "Oliva Dorado", "Health y Sol", "Sportdrinkco", "Centenarius Nutrition", "Vanman", "Daylight Co", "Sol Department / Sol Supps", "Prima bar", "Lineage", "Vera salt"];
+
+const STANDS_FOR = "Jesus, the church, gut health, holistic and circadian health, authenticity, serving and loving others, community, fitness and nutrition, Bible/theology/church history, natural living, marriage, a Spirit-led life, tithing and financing the Kingdom, seeking a God-given calling, originality, doing hard things, time with friends and family, raising a family";
+const STANDS_AGAINST = "hedonism, self-righteousness, conforming to the culture, consumerism, porn and hookup culture, ultra-processed food, sedentary laziness, victim mentality, pride and ego, chasing wealth and status, idols, greed, fakeness and chasing other people's goals, insults and cursing, black-hat marketing, scamming people, taking the easy route";
+
+const PLACEMENTS = [["ig_carousel", "IG carousel"], ["tt_carousel", "TikTok photo"], ["ig_reel", "IG Reel"], ["tt_video", "TikTok video"], ["yt_short", "YT Short"], ["x", "X post"]];
+const METRICS = [["views", "Views"], ["saves", "Saves"], ["shares", "Shares"], ["comments", "Comments"], ["follows", "Follows"]];
+const STATUSES = ["idea", "drafted", "ready", "posted"];
+// Slide looks: light that moves from dawn to dusk. Each has a sun placed where its light comes from.
+const THEMES = {
+  dawn:   { label: "Dawn",         stops: [[0, "#1E2142"], [0.52, "#44325F"], [0.82, "#A9586C"], [1, "#F0A267"]], fg: "#FFF5E8", accent: "#FFC98A", soft: "rgba(255,245,232,.8)",  foot: "#2A1626", sun: { x: .74, y: 1.0,  r: 150, c: "#FFE0A6" } },
+  golden: { label: "Golden Hour",  stops: [[0, "#FBE3B0"], [0.55, "#F2B66F"], [1, "#DE8649"]],                    fg: "#2A180C", accent: "#8A3414", soft: "rgba(42,24,12,.76)",    sun: { x: .84, y: .13, r: 95,  c: "#FFF4D6" } },
+  sage:   { label: "Sage Morning", stops: [[0, "#E6ECDD"], [0.6, "#EAE5D0"], [1, "#F4D6B8"]],                    fg: "#25321E", accent: "#B05F2A", soft: "rgba(37,50,30,.74)",    sun: { x: .86, y: .11, r: 80,  c: "#F5BC82" } },
+  clay:   { label: "Clay",         stops: [[0, "#B35E3E"], [0.6, "#86412B"], [1, "#4A2318"]],                    fg: "#FCEDE0", accent: "#F7C27C", soft: "rgba(252,237,224,.8)",  sun: { x: .84, y: .13, r: 90,  c: "#F3A35F" } },
+  dusk:   { label: "Dusk",         stops: [[0, "#11172E"], [0.55, "#2B2A52"], [0.84, "#7E4567"], [1, "#E08A62"]], fg: "#FFF2E4", accent: "#F6B068", soft: "rgba(255,242,228,.78)", foot: "#20131F", sun: { x: .5, y: 1.03, r: 170, c: "#FFB673" } },
+  linen:  { label: "Linen Sun",    stops: [[0, "#F6EFE3"], [1, "#EEDFC9"]],                                      fg: "#3A2516", accent: "#BC5C27", soft: "rgba(58,37,22,.74)",    sun: { x: .82, y: .16, r: 120, c: "#F2A35E" } },
+  pine:   { label: "Evening Pine", stops: [[0, "#24432F"], [1, "#152A1F"]],                                      fg: "#F2EEE3", accent: "#E8B04B", soft: "rgba(242,238,227,.74)", sun: { x: .85, y: .13, r: 70,  c: "#E8B04B" } },
+};
+// "Auto" picks a look per pillar so the grid reads as one family with variety.
+const PILLAR_THEME = { 1: "dusk", 2: "dawn", 3: "sage", 4: "golden", 5: "clay", 6: "linen", 7: "golden", 8: "pine" };
+const themeKey = post => THEMES[post.theme] ? post.theme : THEMES[settings.theme] ? settings.theme : PILLAR_THEME[post.pillar] || "dawn";
+const themeSwatch = k => `linear-gradient(180deg, ${THEMES[k].stops.map(([o, c]) => `${c} ${Math.round(o * 100)}%`).join(", ")})`;
+const DEFAULT_SETTINGS = {
+  handle: "@yourhandle",
+  sprintStart: "2026-10-29",
+  sprintDays: 30,
+  theme: "auto",
+  niche: "Christian men in their 20s and 30s who want more energy, a stronger body, and a rooted life, and who are tired of wellness culture that leaves God out.",
+};
+
+/* ---------- Helpers ---------- */
+const $ = (s, el = document) => el.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const pad = n => String(n).padStart(2, "0");
+const ymd = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+const parse = s => { const [y, m, d] = String(s).split("-").map(Number); return new Date(y, m - 1, d); };
+const addDays = (s, n) => { const d = parse(s); d.setDate(d.getDate() + n); return ymd(d); };
+const daysBetween = (a, b) => Math.round((parse(b) - parse(a)) / 86400000);
+const TODAY = ymd(new Date());
+const fmtDay = s => parse(s).toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" });
+const uid = () => "p" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+const num = v => Number(v) || 0;
+let toastTimer;
+function toast(msg) { const t = $("#toast"); t.textContent = msg; t.hidden = false; clearTimeout(toastTimer); toastTimer = setTimeout(() => t.hidden = true, 2200); }
+async function copy(text, label = "Copied") {
+  try { await navigator.clipboard.writeText(text); toast(label); }
+  catch { const ta = document.createElement("textarea"); ta.value = text; document.body.append(ta); ta.select(); try { document.execCommand("copy"); toast(label); } catch { toast("Select the text and copy it"); } ta.remove(); }
+}
+function blankPost(extra = {}) {
+  return { pillar: 2, title: "", hook: "", status: "idea", date: "", slides: [], caption: "", hashtags: [], script: "", xpost: "",
+    placements: {}, metrics: {}, notes: "", theme: "", ...extra };
+}
+
+/* ---------- Store: shared db when available, this browser otherwise ---------- */
+let posts = [], settings = { ...DEFAULT_SETTINGS }, db = null, sampleFn = null, downloads = null, assets = null, storeMode = "loading";
+let voice = { notes: "" };
+const store = {
+  async init() {
+    const cl = window.claude;
+    if (cl?.use) {
+      [db, sampleFn, downloads, assets] = await Promise.all(["db", "sample", "downloads", "assets"].map(n => cl.use(n).catch(() => null)));
+    }
+    if (db) {
+      storeMode = "db";
+      db.collection("posts").onSnapshot(snap => {
+        posts = snap.docs.map(d => ({ ...structuredClone(d.data()), id: d.id }));
+        onData();
+      }, e => { storeMode = "error"; console.warn(e); onData(); });
+      db.doc("settings/main").onSnapshot(s => { if (s.exists) settings = { ...DEFAULT_SETTINGS, ...s.data() }; onData(); });
+      db.doc("voice/profile").onSnapshot(s => { if (s.exists) voice = { notes: "", ...structuredClone(s.data()) }; if (!$("#v-playbook").contains(document.activeElement)) renderPlaybook(); });
+    } else {
+      storeMode = "local";
+      try { posts = JSON.parse(localStorage.getItem("lie-posts") || "[]"); settings = { ...DEFAULT_SETTINGS, ...JSON.parse(localStorage.getItem("lie-settings") || "{}") }; voice = { notes: "", ...JSON.parse(localStorage.getItem("lie-voice") || "{}") }; } catch {}
+      onData();
+    }
+    renderGenerate();
+  },
+  async save(p) {
+    const { id, ...body } = p;
+    body.updated = new Date().toISOString();
+    if (storeMode === "db") return db.collection("posts").doc(id).set(body);
+    const i = posts.findIndex(x => x.id === id); if (i >= 0) posts[i] = { ...p }; else posts.push({ ...p });
+    try { localStorage.setItem("lie-posts", JSON.stringify(posts)); } catch {}
+    onData();
+  },
+  async remove(id) {
+    if (storeMode === "db") return db.collection("posts").doc(id).delete();
+    posts = posts.filter(p => p.id !== id);
+    try { localStorage.setItem("lie-posts", JSON.stringify(posts)); } catch {}
+    onData();
+  },
+  async saveVoice() {
+    voice.updated = new Date().toISOString();
+    if (storeMode === "db") return db.doc("voice/profile").set(voice);
+    try { localStorage.setItem("lie-voice", JSON.stringify(voice)); } catch {}
+  },
+  async saveSettings() {
+    if (storeMode === "db") return db.doc("settings/main").set(settings);
+    try { localStorage.setItem("lie-settings", JSON.stringify(settings)); } catch {}
+    onData();
+  },
+};
+
+/* ---------- Sprint math ---------- */
+const sprintEnd = () => addDays(settings.sprintStart, settings.sprintDays - 1);
+const inSprint = p => p.date && p.date >= settings.sprintStart && p.date <= sprintEnd();
+function sprintDates() { return Array.from({ length: settings.sprintDays }, (_, i) => addDays(settings.sprintStart, i)); }
+function placedCount(p) { return Object.values(p.placements || {}).filter(Boolean).length; }
+function score(p) { const m = p.metrics || {}; return num(m.saves) + num(m.shares) * 2 + num(m.follows) * 3; }
+// Picks pillars for empty days so the sprint lands on the doc's weighting.
+function planPillars(emptyDates) {
+  const counts = Object.fromEntries(PILLARS.map(p => [p.n, 0]));
+  posts.filter(inSprint).forEach(p => counts[p.pillar] = (counts[p.pillar] || 0) + 1);
+  let total = posts.filter(inSprint).length;
+  return emptyDates.map(date => {
+    total++;
+    let best = PILLARS[0], gap = -Infinity;
+    for (const p of PILLARS) { const g = p.target / 100 * total - counts[p.n]; if (g > gap) { gap = g; best = p; } }
+    counts[best.n]++;
+    return { date, pillar: best.n };
+  });
+}
+function nextEmptyDate() {
+  const taken = new Set(posts.map(p => p.date));
+  return sprintDates().find(d => d >= TODAY && !taken.has(d)) || addDays(TODAY, 1);
+}
+
+/* ---------- Routing ---------- */
+const VIEWS = ["sprint", "studio", "generate", "playbook"];
+let view = "sprint";
+function route() {
+  const h = location.hash.slice(1);
+  view = VIEWS.includes(h) ? h : "sprint";
+  VIEWS.forEach(v => { $("#v-" + v).hidden = v !== view; });
+  document.querySelectorAll("nav a").forEach(a => { if (a.dataset.v === view) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current"); });
+  if (view === "studio") renderStudio();
+  if (view === "generate") renderGenerate();
+  window.scrollTo(0, 0);
+}
+window.addEventListener("hashchange", route);
+function go(v) { if (location.hash === "#" + v) route(); else location.hash = v; }
+
+function onData() {
+  const day = Math.min(Math.max(daysBetween(settings.sprintStart, TODAY) + 1, 0), settings.sprintDays);
+  $("#daybadge").innerHTML = day > 0 ? `Day <b>${day}</b> / ${settings.sprintDays}` : `Starts ${esc(fmtDay(settings.sprintStart))}`;
+  renderSprint();
+  if (!$("#v-playbook").contains(document.activeElement)) renderPlaybook();
+  if (view === "studio") { if (!draft || draft.id !== selectedId || !$("#e-title")) renderStudio(); else renderStudioList(); }
+}
+
+/* ---------- Sprint view ---------- */
+function renderSprint() {
+  const el = $("#v-sprint");
+  if (storeMode === "loading") { el.innerHTML = `<div class="empty"><h2>Loading your pipeline</h2><p>Your posts appear here in a moment.</p></div>`; return; }
+  const sp = posts.filter(inSprint);
+  const shipped = sp.filter(p => p.status === "posted").length;
+  const ready = sp.filter(p => p.status === "ready" || p.status === "posted").length;
+  const placed = sp.reduce((a, p) => a + placedCount(p), 0);
+  const placeTarget = settings.sprintDays * PLACEMENTS.length;
+  const engaged = sp.reduce((a, p) => a + num(p.metrics?.saves) + num(p.metrics?.shares), 0);
+  const follows = sp.reduce((a, p) => a + num(p.metrics?.follows), 0);
+  const pct = (a, b) => Math.min(100, Math.round(a / Math.max(b, 1) * 100));
+
+  const byDate = {}; posts.forEach(p => { if (p.date) (byDate[p.date] ||= []).push(p); });
+  const dates = sprintDates();
+  const lead = (parse(dates[0]).getDay() + 6) % 7; // Monday-first grid
+  const cells = [];
+  for (let i = 0; i < lead; i++) { const d = addDays(dates[0], i - lead); cells.push(`<div class="cell out"><span class="d">${parse(d).getDate()}</span></div>`); }
+  for (const d of dates) {
+    const list = byDate[d] || [];
+    const dn = parse(d), label = `${dn.toLocaleDateString(undefined, { month: "short" })} ${dn.getDate()}`;
+    if (list.length) {
+      const p = list[0];
+      cells.push(`<div class="cell has${d === TODAY ? " today" : ""}" role="button" tabindex="0" data-open="${p.id}" style="border-left-color:${pColor(p.pillar)}">
+        <span class="d"><span>${label}</span><span class="status st-${p.status}">${p.status}</span></span>
+        <span class="t">${esc(p.title || p.hook || "Untitled")}</span>${list.length > 1 ? `<span class="muted" style="font-size:11px">+${list.length - 1} more</span>` : ""}</div>`);
+    } else {
+      cells.push(`<div class="cell${d === TODAY ? " today" : ""}"><span class="d"><span>${label}</span></span><button class="add" data-fill="${d}">+ Generate</button></div>`);
+    }
+  }
+  const totalSp = Math.max(sp.length, 1);
+  const mix = PILLARS.map(p => {
+    const c = sp.filter(x => x.pillar === p.n).length, actual = Math.round(c / totalSp * 100);
+    return `<div class="m"><span>${esc(p.short)}</span><span class="bar" title="${actual}% now, ${p.target}% target"><i style="width:${actual}%;background:${pColor(p.n)}"></i><b style="left:${p.target}%"></b></span><span class="v">${actual}% / ${p.target}%</span></div>`;
+  }).join("");
+  const top = sp.filter(p => p.status === "posted").sort((a, b) => score(b) - score(a)).slice(0, 5);
+  const emptyCount = dates.filter(d => d >= TODAY && !byDate[d]).length;
+
+  el.innerHTML = `
+    <div class="row" style="justify-content:space-between;align-items:end">
+      <div><p class="eyebrow">30-day lock-in · ${esc(fmtDay(settings.sprintStart))} to ${esc(fmtDay(sprintEnd()))}</p>
+      <h2 style="font-size:clamp(30px,5vw,46px)">Volume with a soul</h2></div>
+      <div class="row">${emptyCount ? `<button class="btn sun" id="fillAll">Fill ${emptyCount} empty days</button>` : ""}<button class="btn primary" data-go="generate">New post</button></div>
+    </div>
+    ${storeMode === "local" ? `<p class="note">Saving to this browser only. Open this page on claude.ai while signed in to load your shared pipeline.</p>` : ""}
+    ${storeMode === "error" ? `<p class="note err">Your pipeline could not load. Reload the page to try again.</p>` : ""}
+    <div class="stats">
+      <div class="stat"><p class="eyebrow">Ideas shipped</p><div class="n">${shipped}<small> / ${settings.sprintDays}</small></div><div class="meter"><i style="width:${pct(shipped, settings.sprintDays)}%"></i></div></div>
+      <div class="stat"><p class="eyebrow">Placements</p><div class="n">${placed}<small> / ${placeTarget}</small></div><div class="meter"><i style="width:${pct(placed, placeTarget)}%"></i></div></div>
+      <div class="stat"><p class="eyebrow">Ready to post</p><div class="n">${ready}<small> in the bank</small></div></div>
+      <div class="stat"><p class="eyebrow">Saves + shares</p><div class="n">${engaged}<small> · ${follows} follows</small></div></div>
+    </div>
+    <div class="two">
+      <div class="panel"><div class="row" style="justify-content:space-between;margin-bottom:12px"><h3 style="font-size:22px">The calendar</h3><span class="muted" style="font-size:13px">Tap a day to open it in Studio</span></div>
+        <div class="cal">${["Mon","Tue","Wed","Thu","Fri","Sat","Sun"].map(d => `<span class="dow">${d}</span>`).join("")}${cells.join("")}</div></div>
+      <div style="display:grid;gap:22px">
+        <div class="panel"><h3 style="font-size:22px;margin-bottom:12px">Daily cadence</h3>
+          <div class="cadence">
+            <div><b>Carousel</b><span>Post to IG, then TikTok photo mode. Same slides.</span></div>
+            <div><b>Video</b><span>Film the script once (30–45s). Post to Reels, TikTok, and YT Shorts.</span></div>
+            <div><b>X post</b><span>The one-line version of the idea.</span></div>
+            <div><b>Hour 1</b><span>Reply to every comment. Note saves and follows in Studio the next day.</span></div>
+          </div></div>
+        <div class="panel"><h3 style="font-size:22px;margin-bottom:4px">Pillar mix</h3><p class="muted" style="margin:0 0 12px;font-size:13px">Bar is this sprint. Tick is the target from your doc.</p><div class="mix">${mix}</div></div>
+        <div class="panel"><h3 style="font-size:22px;margin-bottom:10px">What's landing</h3>
+          ${top.length ? `<ol class="toplist">${top.map(p => `<li><span>${esc(p.title)}</span><span>${num(p.metrics?.saves)} saves · ${num(p.metrics?.shares)} shares · ${num(p.metrics?.follows)} follows</span></li>`).join("")}</ol>`
+            : `<p class="muted" style="margin:0">Mark posts as posted and log saves, shares, and follows. The posts that move people rise here. Make more of those.</p>`}</div>
+      </div>
+    </div>`;
+}
+document.addEventListener("click", e => {
+  const t = e.target.closest("[data-open],[data-fill],[data-go],#fillAll");
+  if (!t) return;
+  if (t.dataset.open) { selectedId = t.dataset.open; draft = null; go("studio"); }
+  else if (t.dataset.fill) { genState = { ...genState, date: t.dataset.fill, pillar: planPillars([t.dataset.fill])[0].pillar, result: null, angle: "" }; go("generate"); }
+  else if (t.dataset.go) { if (t.dataset.go === "generate") genState = { ...genState, date: nextEmptyDate(), result: null }; go(t.dataset.go); }
+  else if (t.id === "fillAll") fillEmptyDays(t);
+});
+document.addEventListener("keydown", e => { if (e.key === "Enter" && e.target.matches?.("[data-open]")) e.target.click(); });
+
+/* ---------- Claude prompts ---------- */
+function brief() {
+  return `You write social content for a Christian holistic-health creator. Brand lens: helping people build a healthier, more faithful, more grounded life under Jesus through real food, created rhythms, strength, home, community, and purposeful work.
+Who it's for: ${settings.niche}
+He stands for: ${STANDS_FOR}.
+He stands against: ${STANDS_AGAINST}.
+Voice: first person, plain, warm, direct, like a brother who's a few steps ahead. Conviction without self-righteousness. Faith is woven into the worldview, not tacked on. Short sentences. No cursing, no insults, no mocking people. No hype words, no emoji walls, no fake urgency.
+Integrity rules: never claim a food, product, or habit cures or treats a disease. Use "may", "can help", "in my experience" when evidence is mixed. Quote Scripture briefly and always give the reference. Never invent studies, numbers, or quotes. Supplements and products are secondary to fundamentals. Health is a means to love God and serve people, never an idol.
+Growth rules (from Bloom's playbook): grow the community, not a sale. Speak to one specific person. Every post should be worth saving or sending to a friend.${voiceBlock()}`;
+}
+// His own approved and best-performing posts are the strongest voice signal, so they ride along with every request.
+function voiceExamples(max = 5) {
+  const done = posts.filter(p => (p.status === "posted" || p.status === "ready") && p.caption);
+  const best = done.filter(p => p.status === "posted").sort((a, b) => score(b) - score(a));
+  const recent = done.filter(p => !best.slice(0, 3).includes(p)).sort((a, b) => (b.updated || "").localeCompare(a.updated || ""));
+  return [...best.slice(0, 3), ...recent].slice(0, max);
+}
+function voiceBlock() {
+  const ex = voiceExamples();
+  return (voice.notes ? `\n\nHIS VOICE GUIDE (learned from his edits; follow it closely):\n${voice.notes}` : "") +
+    (ex.length ? `\n\nPOSTS HE APPROVED (match this voice, don't copy the topics):\n${ex.map(p => `- Hook: ${p.hook}\n  Caption: ${p.caption.slice(0, 420).replace(/\n+/g, " / ")}`).join("\n")}` : "");
+}
+const aiSnapshot = r => ({ hook: r.hook, caption: r.caption, xpost: r.xpost, script: r.script, slides: r.slides.map(x => x.h) });
+const SHAPE = `Reply with only JSON in this exact shape:
+{"title": "internal name, max 8 words",
+ "hook": "the scroll-stopping first line, max 12 words, specific, no clickbait",
+ "slides": [{"h": "headline", "b": "body"}],
+ "caption": "80-180 words. First line restates the hook. Practical. Ends with one question that invites a comment.",
+ "hashtags": ["3 to 5 tags without #"],
+ "script": "30-45 second talking-head script for Reels/TikTok/Shorts. Lines: HOOK (0-3s): ... then [ON SCREEN: ...] cues and short beats, then CTA: ...",
+ "xpost": "one post for X, max 270 characters, no hashtags"}
+Slides: 6 to 8 total. Slide 1: h = the hook, b = one short line that makes them swipe. Middle slides: one idea each, h max 7 words, b max 38 words, concrete and practical. Last slide: h invites a save, share, or follow (never a purchase), b one warm sentence.`;
+function postPrompt({ pillar, angle, title, hook, product }) {
+  const p = P[pillar];
+  return `${brief()}
+
+Pillar: ${p.name}. Purpose: ${p.purpose}
+Sub-topics in this pillar: ${p.subs.join("; ")}.
+${angle ? `Angle: ${angle}` : ""}${title ? `\nWorking title: ${title}` : ""}${hook ? `\nHook to build on: ${hook}` : ""}
+${product ? `Work in ${product} naturally as something he personally uses, in one slide at most and in the caption, with a plain disclosure line in the caption ("I partner with ${product}" style). The post must stand on its own without the product.` : "Do not mention any brand or product."}
+
+${SHAPE}`;
+}
+function cleanPost(r) {
+  const s = Array.isArray(r?.slides) ? r.slides.filter(x => x && (x.h || x.b)).map(x => ({ h: String(x.h || ""), b: String(x.b || "") })) : [];
+  return { title: String(r?.title || ""), hook: String(r?.hook || s[0]?.h || ""), slides: s, caption: String(r?.caption || ""),
+    hashtags: (Array.isArray(r?.hashtags) ? r.hashtags : []).map(h => String(h).replace(/^#/, "")).slice(0, 6),
+    script: String(r?.script || ""), xpost: String(r?.xpost || "") };
+}
+function sampleError(e) {
+  if (e?.code === "not_granted") return "Claude access was declined for this page. Allow it from the page's Permissions menu to generate.";
+  if (e?.code === "rate_limited") return "Claude is rate-limited right now. Wait a minute, then try again.";
+  if (e?.code === "invalid_json") return "Claude's answer came back malformed. Try again.";
+  return e?.message || "Generation failed. Try again.";
+}
+
+/* ---------- Generate view ---------- */
+let genState = { pillar: 3, angle: "", product: "", date: "", result: null, busy: false, stream: "", error: "" };
+let genAbort = null;
+function renderGenerate() {
+  const el = $("#v-generate");
+  if (!genState.date) genState.date = nextEmptyDate();
+  const p = P[genState.pillar];
+  const r = genState.result;
+  el.innerHTML = `
+    <div><p class="eyebrow">One idea in, six placements out</p><h2 style="font-size:clamp(30px,5vw,46px)">Generate a post</h2></div>
+    ${!sampleFn ? `<p class="note">Generating needs this page open on claude.ai, signed in. You can still write posts by hand in Studio.</p>` : ""}
+    <div class="gen">
+      <div class="panel fields">
+        <label class="f" for="g-pillar">Pillar
+          <select id="g-pillar">${PILLARS.map(x => `<option value="${x.n}"${x.n === genState.pillar ? " selected" : ""}>${x.n}. ${esc(x.name)} (${x.target}%)</option>`).join("")}</select></label>
+        <p class="muted serif" style="margin:-4px 0 0">${esc(p.purpose)}</p>
+        <div><p class="eyebrow" style="margin:0 0 6px">Angles from your doc</p><div class="angles">${p.angles.map(a => `<button data-angle="${esc(a)}">${esc(a)}</button>`).join("")}</div></div>
+        <div><p class="eyebrow" style="margin:0 0 6px">Or start from a sub-topic</p><div class="angles">${p.subs.map(a => `<button data-angle="${esc(a)}">${esc(a)}</button>`).join("")}</div></div>
+        <label class="f" for="g-angle">Angle, story, or rough thought
+          <textarea id="g-angle" rows="4" placeholder="e.g. I stopped scrolling in bed and started reading Psalms before sleep. What changed in two weeks.">${esc(genState.angle)}</textarea></label>
+        <div class="grid3" style="grid-template-columns:minmax(0,1.4fr) minmax(0,1fr)">
+          <label class="f" for="g-product">Product tie-in (optional)
+            <select id="g-product"><option value="">None</option>${PRODUCTS.map(x => `<option${x === genState.product ? " selected" : ""}>${esc(x)}</option>`).join("")}</select></label>
+          <label class="f" for="g-date">Schedule for<input type="date" id="g-date" value="${esc(genState.date)}"></label>
+        </div>
+        <div class="row">
+          <button class="btn primary" id="g-go" ${!sampleFn || genState.busy ? "disabled" : ""}>${genState.busy ? "Writing…" : r ? "Write another version" : "Write the post"}</button>
+          ${genState.busy ? `<button class="btn ghost" id="g-stop">Stop</button>` : ""}
+        </div>
+        ${genState.error ? `<p class="err">${esc(genState.error)}</p>` : ""}
+      </div>
+      <div class="panel result" id="g-result">
+        ${genState.busy ? `<p class="eyebrow">Claude is writing</p><div class="stream" id="g-stream">${esc(genState.stream || "Thinking…")}</div>`
+        : r ? `<p class="eyebrow"><span class="chip"><span class="dot" style="background:${pColor(genState.pillar)}"></span>${esc(p.short)}</span></p>
+            <h3>${esc(r.hook)}</h3><p class="muted" style="margin:0">${esc(r.title)}</p>
+            <ol>${r.slides.map(s => `<li><b>${esc(s.h)}</b>${esc(s.b)}</li>`).join("")}</ol>
+            <p class="eyebrow" style="margin-top:16px">Caption</p><p class="serif" style="white-space:pre-wrap;margin:0">${esc(r.caption)}</p>
+            <p class="eyebrow" style="margin-top:16px">Video script</p><p style="white-space:pre-wrap;margin:0;font-size:14px">${esc(r.script)}</p>
+            <p class="eyebrow" style="margin-top:16px">X post</p><p style="margin:0">${esc(r.xpost)}</p>
+            <div class="row" style="margin-top:18px"><button class="btn primary" id="g-add">Add to ${esc(fmtDay(genState.date))}</button><span class="note">Check Scripture references and any health claim before posting.</span></div>`
+        : `<div class="empty" style="padding:24px 8px"><h2>Pick an angle</h2><p>Claude writes the carousel, caption, a 30–45s video script, and an X post in your voice. You review, tweak, and add it to the calendar.</p></div>`}
+      </div>
+    </div>`;
+}
+$("#v-generate").addEventListener("click", async e => {
+  const a = e.target.closest("[data-angle]");
+  if (a) { genState.angle = a.dataset.angle; $("#g-angle").value = genState.angle; return; }
+  if (e.target.id === "g-stop") { genAbort?.abort(); return; }
+  if (e.target.id === "g-go") return runGenerate();
+  if (e.target.id === "g-add") {
+    const id = uid();
+    await store.save({ ...blankPost(), ...genState.result, ai: aiSnapshot(genState.result), id, pillar: genState.pillar, date: genState.date, status: "drafted" });
+    genState = { ...genState, result: null, angle: "", date: "" };
+    selectedId = id; toast("Added to the calendar"); go("studio");
+  }
+});
+$("#v-generate").addEventListener("change", e => {
+  if (e.target.id === "g-pillar") { genState.pillar = Number(e.target.value); genState.angle = $("#g-angle").value; renderGenerate(); }
+  if (e.target.id === "g-product") genState.product = e.target.value;
+  if (e.target.id === "g-date") genState.date = e.target.value;
+});
+$("#v-generate").addEventListener("input", e => { if (e.target.id === "g-angle") genState.angle = e.target.value; });
+async function runGenerate() {
+  genState = { ...genState, busy: true, stream: "", error: "" }; renderGenerate();
+  genAbort = new AbortController();
+  try {
+    const r = await sampleFn.json(postPrompt(genState), { signal: genAbort.signal, modelTier: "complex", cache: false,
+      onText: ({ text }) => { genState.stream = text; const s = $("#g-stream"); if (s) { s.textContent = text; s.scrollTop = s.scrollHeight; } } });
+    genState.result = cleanPost(r);
+    if (!genState.result.slides.length) throw { message: "Claude returned no slides. Try again." };
+  } catch (e) { if (e?.code !== "aborted" && e?.name !== "AbortError") genState.error = sampleError(e); }
+  genState.busy = false; renderGenerate();
+}
+async function fillEmptyDays(btn) {
+  if (!sampleFn) { toast("Open on claude.ai to generate"); return; }
+  const taken = new Set(posts.map(p => p.date));
+  const empties = sprintDates().filter(d => d >= TODAY && !taken.has(d));
+  if (!empties.length) return;
+  const plan = planPillars(empties);
+  const existing = posts.filter(p => p.title).map(p => "- " + p.title).join("\n");
+  btn.disabled = true; btn.textContent = "Planning…";
+  try {
+    const r = await sampleFn.json(`${brief()}
+
+Plan post ideas for these calendar slots. Each slot has a fixed pillar; write one strong idea per slot.
+${plan.map(s => `${s.date} | pillar ${s.pillar}: ${P[s.pillar].name}`).join("\n")}
+
+Pillar sub-topics:
+${PILLARS.map(p => `${p.n}. ${p.subs.join("; ")}`).join("\n")}
+
+Already planned (don't repeat):
+${existing || "(none)"}
+
+Reply with only a JSON array: [{"date": "YYYY-MM-DD", "pillar": 3, "title": "internal name, max 8 words", "hook": "scroll-stopping first line, max 12 words"}]`, { modelTier: "complex", cache: false });
+    const valid = new Map(plan.map(s => [s.date, s.pillar]));
+    const items = (Array.isArray(r) ? r : []).filter(x => valid.has(x?.date) && x.title);
+    for (const x of items) await store.save({ ...blankPost(), id: uid(), date: x.date, pillar: valid.get(x.date), title: String(x.title), hook: String(x.hook || "") });
+    toast(`${items.length} ideas added. Draft them in Studio.`);
+  } catch (e) { toast(sampleError(e)); }
+  btn.disabled = false;
+}
+
+/* ---------- Studio ---------- */
+let selectedId = null, draft = null, saveTimer = null, dirty = false;
+function renderStudio() {
+  const el = $("#v-studio");
+  if (!posts.length) {
+    el.innerHTML = `<div class="empty"><h2>No posts yet</h2><p>Generate your first post, or add a blank one and write it yourself.</p><div class="row" style="justify-content:center;margin-top:12px"><button class="btn primary" data-go="generate">Generate a post</button><button class="btn" id="s-blank">Blank post</button></div></div>`;
+    return;
+  }
+  if (!selectedId || !posts.find(p => p.id === selectedId)) {
+    const next = [...posts].filter(p => p.status !== "posted" && p.date >= TODAY).sort((a, b) => a.date.localeCompare(b.date))[0];
+    selectedId = (next || posts[0]).id;
+  }
+  draft = structuredClone(posts.find(p => p.id === selectedId));
+  draft.slides ||= []; draft.placements ||= {}; draft.metrics ||= {}; draft.hashtags ||= [];
+  el.innerHTML = `
+    <div class="studio-head">
+      <label class="f" for="s-pick">Post<select id="s-pick"></select></label>
+      <div class="row"><button class="btn small" id="s-prev" aria-label="Previous post">←</button><button class="btn small" id="s-next" aria-label="Next post">→</button><button class="btn small" id="s-blank">+ Blank</button></div>
+    </div>
+    <div class="editor">
+      <div class="fields">
+        <div class="panel fields">
+          <label class="f" for="e-title">Working title<input type="text" id="e-title" value="${esc(draft.title)}"></label>
+          <div class="grid4">
+            <label class="f" for="e-pillar">Pillar<select id="e-pillar">${PILLARS.map(x => `<option value="${x.n}"${x.n === draft.pillar ? " selected" : ""}>${esc(x.short)}</option>`).join("")}</select></label>
+            <label class="f" for="e-date">Date<input type="date" id="e-date" value="${esc(draft.date)}"></label>
+            <label class="f" for="e-time">Post at<input type="time" id="e-time" value="${esc(draft.time || "")}"></label>
+            <label class="f" for="e-status">Status<select id="e-status">${STATUSES.map(s => `<option${s === draft.status ? " selected" : ""}>${s}</option>`).join("")}</select></label>
+          </div>
+          <div class="row" style="justify-content:space-between"><span class="saved" id="e-saved">Saved</span>
+            <span class="row">${draft.slides.length ? "" : `<button class="btn sun small" id="e-draft" ${sampleFn ? "" : "disabled"}>Draft full post with Claude</button>`}<button class="btn ghost small danger" id="e-del">Delete</button></span></div>
+          <div id="e-delconfirm" hidden class="note">Delete “${esc(draft.title || "this post")}” for good? <button class="btn small danger" id="e-delyes">Delete</button> <button class="btn small ghost" id="e-delno">Keep</button></div>
+        </div>
+        <div class="panel">
+          <div class="row" style="justify-content:space-between;margin-bottom:6px"><h3 style="font-size:22px">Carousel slides</h3>
+            <button class="btn small" id="e-hooks" ${sampleFn ? "" : "disabled"}>Hook ideas</button></div>
+          <div class="hooks" id="e-hooklist" hidden></div>
+          <div id="e-slides"></div>
+          <button class="btn small" id="e-addslide" style="margin-top:8px">+ Add slide</button>
+        </div>
+        <div class="panel fields">
+          <h3 style="font-size:22px">Results</h3>
+          <div><p class="eyebrow" style="margin:0 0 6px">Posted to</p><div class="checks">${PLACEMENTS.map(([k, l]) => `<label><input type="checkbox" data-place="${k}"${draft.placements[k] ? " checked" : ""}> ${l}</label>`).join("")}</div></div>
+          <div class="metrics">${METRICS.map(([k, l]) => `<label class="f" for="m-${k}">${l}<input type="number" min="0" inputmode="numeric" id="m-${k}" data-metric="${k}" value="${draft.metrics[k] ?? ""}"></label>`).join("")}</div>
+          <label class="f" for="e-notes">What I learned<textarea id="e-notes" rows="2" placeholder="Which hook worked, what people said, what to make next">${esc(draft.notes)}</textarea></label>
+        </div>
+      </div>
+      <div class="fields">
+        <div class="panel fields">
+          <div class="row" style="justify-content:space-between"><h3 style="font-size:22px">Preview · 1080×1350</h3>
+          </div>
+          <div class="themes" role="group" aria-label="Slide look">
+            <button class="auto" data-theme-pick="" aria-pressed="${!THEMES[draft.theme]}" title="Auto: a look picked for the pillar">Auto</button>
+            ${Object.entries(THEMES).map(([k, t]) => `<button data-theme-pick="${k}" aria-pressed="${draft.theme === k}" title="${t.label}" aria-label="${t.label}" style="background:${themeSwatch(k)}"></button>`).join("")}
+            <span class="muted" id="e-themename" style="font-size:13px">${esc(THEMES[themeKey(draft)].label)}${THEMES[draft.theme] ? "" : " · auto"}</span>
+          </div>
+          <div class="previews" id="e-previews"></div>
+          <div class="row" style="font-size:13px"><span class="muted">Slide 1 photo:</span>
+            <label class="btn small" for="e-cover" style="cursor:pointer">${draft.cover ? "Replace photo" : "Add your photo"}</label>
+            <input type="file" id="e-cover" accept="image/jpeg,image/png,image/webp" hidden>
+            ${draft.cover ? `<button class="btn small ghost" id="e-uncover">Remove photo</button>` : `<span class="muted">Sunrise, a meal, a trail. Your real life beats any gradient.</span>`}</div>
+          <div class="row"><button class="btn primary" id="e-zip">Download all slides (.zip)</button><span class="muted" style="font-size:13px">Or save slides one at a time below each preview.</span></div>
+        </div>
+        <div class="panel fields">
+          ${outBlock("caption", "Caption", draft.caption + (draft.hashtags.length ? "" : ""), 7, 2200)}
+          <label class="f" for="o-hashtags">Hashtags<input type="text" id="o-hashtags" value="${esc(draft.hashtags.map(h => "#" + h).join(" "))}"></label>
+          ${outBlock("script", "Video script · Reels, TikTok, Shorts", draft.script, 9, 0, `<button class="btn small sun" id="e-film">Film it</button>`)}
+          ${outBlock("xpost", "X post", draft.xpost, 3, 280)}
+        </div>
+      </div>
+    </div>`;
+  renderStudioList();
+  renderSlideEditors();
+  drawPreviews();
+}
+function outBlock(key, label, value, rows, limit, extra = "") {
+  return `<div class="out-block"><div class="row"><label class="f" for="o-${key}" style="margin:0">${label}</label><span class="row" style="gap:8px">${limit ? `<span class="count" id="c-${key}"></span>` : ""}${extra}<button class="btn small" data-copy="${key}">Copy</button></span></div>
+    <textarea id="o-${key}" data-out="${key}" rows="${rows}">${esc(value)}</textarea></div>`;
+}
+function renderStudioList() {
+  const sel = $("#s-pick"); if (!sel) return;
+  const sorted = [...posts].sort((a, b) => (a.date || "9").localeCompare(b.date || "9"));
+  sel.innerHTML = sorted.map(p => `<option value="${p.id}"${p.id === selectedId ? " selected" : ""}>${p.date ? esc(fmtDay(p.date)) + " · " : ""}${esc(P[p.pillar]?.short || "")} · ${esc(p.title || p.hook || "Untitled")} [${p.status}]</option>`).join("");
+  updateCounts();
+}
+function renderSlideEditors() {
+  const box = $("#e-slides");
+  if (!draft.slides.length) { box.innerHTML = `<p class="muted" style="margin:8px 0">No slides yet. ${draft.hook ? "Hook: <b>" + esc(draft.hook) + "</b>. " : ""}Draft with Claude or add slides by hand.</p>`; return; }
+  const n = draft.slides.length;
+  box.innerHTML = draft.slides.map((s, i) => `<div class="slide-ed">
+      <span class="num">${pad(i + 1)}</span>
+      <div class="stack"><input type="text" data-sh="${i}" value="${esc(s.h)}" aria-label="Slide ${i + 1} headline" placeholder="${i === 0 ? "Hook" : i === n - 1 ? "Call to action" : "Point headline"}">
+        <textarea data-sb="${i}" rows="2" aria-label="Slide ${i + 1} body" placeholder="Body">${esc(s.b)}</textarea></div>
+      <div class="ops"><button data-mv="${i},-1" aria-label="Move up" ${i === 0 ? "disabled" : ""}>↑</button><button data-mv="${i},1" aria-label="Move down" ${i === n - 1 ? "disabled" : ""}>↓</button><button data-rm="${i}" aria-label="Remove slide">✕</button></div>
+    </div>`).join("");
+}
+function updateCounts() {
+  const c = (k, lim) => { const el = $("#c-" + k); if (el) { const n = (draft?.[k] || "").length; el.textContent = `${n} / ${lim}`; el.classList.toggle("over", n > lim); } };
+  c("caption", 2200); c("xpost", 280);
+}
+function queueSave() {
+  dirty = true; const s = $("#e-saved"); if (s) s.textContent = "Saving…";
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(async () => {
+    const snapshot = structuredClone(draft);
+    try { await store.save(snapshot); dirty = false; const s2 = $("#e-saved"); if (s2) s2.textContent = "Saved"; }
+    catch (e) { const s2 = $("#e-saved"); if (s2) s2.textContent = "Not saved. " + (e?.code === "permission_denied" ? "You can view but not edit this pipeline." : "Check your connection."); }
+  }, 700);
+}
+let previewTimer;
+function queuePreview() { clearTimeout(previewTimer); previewTimer = setTimeout(drawPreviews, 160); }
+
+const studio = $("#v-studio");
+studio.addEventListener("input", e => {
+  const t = e.target; if (!draft) return;
+  if (t.id === "e-title") draft.title = t.value;
+  else if (t.dataset.sh) { draft.slides[t.dataset.sh].h = t.value; if (t.dataset.sh === "0") draft.hook = t.value; queuePreview(); }
+  else if (t.dataset.sb) { draft.slides[t.dataset.sb].b = t.value; queuePreview(); }
+  else if (t.dataset.out) { draft[t.dataset.out] = t.value; updateCounts(); }
+  else if (t.id === "o-hashtags") draft.hashtags = t.value.split(/[\s,]+/).map(h => h.replace(/^#/, "")).filter(Boolean);
+  else if (t.dataset.metric) draft.metrics[t.dataset.metric] = t.value === "" ? "" : num(t.value);
+  else if (t.id === "e-notes") draft.notes = t.value;
+  else return;
+  queueSave();
+});
+studio.addEventListener("change", async e => {
+  const t = e.target;
+  if (t.id === "s-pick") { await flush(); selectedId = t.value; renderStudio(); return; }
+  if (!draft) return;
+  if (t.id === "e-pillar") { draft.pillar = Number(t.value); queuePreview(); }
+  else if (t.id === "e-date") draft.date = t.value;
+  else if (t.id === "e-time") draft.time = t.value;
+  else if (t.id === "e-cover") { uploadCover(t.files?.[0]); t.value = ""; return; }
+  else if (t.id === "e-status") draft.status = t.value;
+  else if (t.dataset.place) { draft.placements[t.dataset.place] = t.checked; if (t.checked && draft.status !== "posted") { draft.status = "posted"; $("#e-status").value = "posted"; } }
+  else return;
+  queueSave();
+});
+async function flush() { if (dirty) { clearTimeout(saveTimer); try { await store.save(structuredClone(draft)); } catch {} dirty = false; } }
+studio.addEventListener("click", async e => {
+  const t = e.target.closest("button"); if (!t) return;
+  if (t.id === "s-blank") { await flush(); const id = uid(); await store.save({ ...blankPost(), id, date: nextEmptyDate(), title: "New post", slides: [{ h: "", b: "" }] }); selectedId = id; renderStudio(); return; }
+  if (!draft) return;
+  if (t.id === "s-prev" || t.id === "s-next") {
+    const sorted = [...posts].sort((a, b) => (a.date || "9").localeCompare(b.date || "9"));
+    const i = sorted.findIndex(p => p.id === selectedId), j = i + (t.id === "s-next" ? 1 : -1);
+    if (sorted[j]) { await flush(); selectedId = sorted[j].id; renderStudio(); }
+  }
+  else if (t.dataset.mv) { const [i, d] = t.dataset.mv.split(",").map(Number); const s = draft.slides; [s[i], s[i + d]] = [s[i + d], s[i]]; draft.hook = s[0]?.h || draft.hook; renderSlideEditors(); drawPreviews(); queueSave(); }
+  else if (t.dataset.rm) { draft.slides.splice(Number(t.dataset.rm), 1); renderSlideEditors(); drawPreviews(); queueSave(); }
+  else if (t.id === "e-addslide") { const s = draft.slides; s.splice(s.length >= 2 ? s.length - 1 : s.length, 0, { h: "", b: "" }); if (s.length === 1) s[0].h = draft.hook || ""; renderSlideEditors(); drawPreviews(); queueSave(); }
+  else if (t.dataset.themePick !== undefined) {
+    draft.theme = t.dataset.themePick; studio.querySelectorAll("[data-theme-pick]").forEach(b => b.setAttribute("aria-pressed", b === t));
+    $("#e-themename").textContent = THEMES[themeKey(draft)].label + (draft.theme ? "" : " · auto"); drawPreviews(); queueSave();
+  }
+  else if (t.id === "e-uncover") { delete draft.cover; delete draft.coverId; renderStudio(); queueSave(); }
+  else if (t.id === "e-film") openPrompter(draft.script);
+  else if (t.dataset.copy) { const k = t.dataset.copy; copy(k === "caption" && draft.hashtags.length ? draft.caption + "\n\n" + draft.hashtags.map(h => "#" + h).join(" ") : draft[k], "Copied " + k); }
+  else if (t.dataset.save) saveSlide(Number(t.dataset.save));
+  else if (t.id === "e-zip") exportZip(t);
+  else if (t.id === "e-del") $("#e-delconfirm").hidden = false;
+  else if (t.id === "e-delno") $("#e-delconfirm").hidden = true;
+  else if (t.id === "e-delyes") { clearTimeout(saveTimer); dirty = false; const id = draft.id; draft = null; selectedId = null; await store.remove(id); toast("Deleted"); renderStudio(); }
+  else if (t.id === "e-draft") draftWithClaude(t);
+  else if (t.id === "e-hooks") hookIdeas(t);
+  else if (t.dataset.hook !== undefined) { const h = t.dataset.hook; draft.hook = h; if (draft.slides[0]) draft.slides[0].h = h; else draft.slides.push({ h, b: "" }); $("#e-hooklist").hidden = true; renderSlideEditors(); drawPreviews(); queueSave(); }
+});
+async function uploadCover(file) {
+  if (!file) return;
+  if (!assets) { toast("Photo upload needs this page open on claude.ai"); return; }
+  const id = draft.id; toast("Uploading photo…");
+  try {
+    const a = await assets.upload(file);
+    if (draft?.id !== id) return;
+    draft.cover = a.url; draft.coverId = a.id; await store.save(structuredClone(draft)); renderStudio(); toast("Photo added to slide 1");
+  } catch (e) { toast(e?.message || "Photo upload failed. Try a smaller JPG or PNG."); }
+}
+async function draftWithClaude(btn) {
+  btn.disabled = true; btn.textContent = "Drafting…";
+  const id = draft.id;
+  try {
+    const r = cleanPost(await sampleFn.json(postPrompt({ pillar: draft.pillar, title: draft.title, hook: draft.hook }), { modelTier: "complex", cache: false }));
+    if (!r.slides.length) throw { message: "Claude returned no slides. Try again." };
+    if (draft?.id !== id) return;
+    Object.assign(draft, r, { ai: aiSnapshot(r), status: draft.status === "idea" ? "drafted" : draft.status });
+    await store.save(structuredClone(draft)); renderStudio(); toast("Drafted. Review before posting.");
+  } catch (e) { toast(sampleError(e)); btn.disabled = false; btn.textContent = "Draft full post with Claude"; }
+}
+async function hookIdeas(btn) {
+  const list = $("#e-hooklist"); btn.disabled = true; btn.textContent = "Thinking…";
+  try {
+    const topic = [draft.title, draft.hook, ...draft.slides.slice(1).map(s => s.h)].filter(Boolean).join(" | ");
+    const r = await sampleFn.json(`${brief()}
+
+Write 6 alternative hooks (first slide headline, max 12 words each) for this post: ${topic}
+Pillar: ${P[draft.pillar].name}. Mix styles: a specific claim, a mistake, a contrast, a question, a personal confession, a number. No clickbait or fear.
+Reply with only a JSON array of 6 strings.`, { modelTier: "default", cache: false });
+    const hooks = (Array.isArray(r) ? r : []).map(String).filter(Boolean);
+    list.innerHTML = `<p class="eyebrow" style="margin:6px 0 0">Tap one to use it as slide 1</p>` + hooks.map(h => `<button data-hook="${esc(h)}">${esc(h)}</button>`).join("");
+    list.hidden = false;
+  } catch (e) { toast(sampleError(e)); }
+  btn.disabled = false; btn.textContent = "Hook ideas";
+}
+
+/* ---------- Slide rendering (canvas, 1080×1350) ---------- */
+const W = 1080, H = 1350, M = 96;
+let fontsReady = null;
+function loadFonts() {
+  return fontsReady ||= Promise.all(['800 100px "Barlow Condensed"', '700 100px "Barlow Condensed"', '600 30px "Barlow"', '700 30px "Barlow"', '400 44px "Newsreader"', 'italic 400 44px "Newsreader"']
+    .map(f => document.fonts.load(f).catch(() => null)));
+}
+function lines(ctx, text, maxW) {
+  const out = [];
+  for (const para of String(text || "").split("\n")) {
+    const words = para.split(/\s+/).filter(Boolean); let line = "";
+    if (!words.length) { out.push(""); continue; }
+    for (const w of words) {
+      const test = line ? line + " " + w : w;
+      if (ctx.measureText(test).width > maxW && line) { out.push(line); line = w; } else line = test;
+    }
+    out.push(line);
+  }
+  return out;
+}
+function fit(ctx, text, font, maxW, maxH, from, to, lh) {
+  for (let s = from; s >= to; s -= 2) { ctx.font = font(s); const ls = lines(ctx, text, maxW); if (ls.length * s * lh <= maxH && ls.every(l => ctx.measureText(l).width <= maxW)) return { s, ls }; }
+  ctx.font = font(to); return { s: to, ls: lines(ctx, text, maxW) };
+}
+function spaced(ctx, px) { if ("letterSpacing" in ctx) ctx.letterSpacing = px + "px"; }
+const hexA = (hex, a) => { const n = parseInt(hex.slice(1), 16); return `rgba(${n >> 16},${(n >> 8) & 255},${n & 255},${a})`; };
+let grainTile;
+function grain(ctx, alpha) {
+  if (!grainTile) {
+    // Seeded so a slide exports exactly as it previews.
+    grainTile = document.createElement("canvas"); grainTile.width = grainTile.height = 220;
+    const g = grainTile.getContext("2d"), d = g.createImageData(220, 220); let seed = 7;
+    for (let p = 0; p < d.data.length; p += 4) { seed = (seed * 16807) % 2147483647; const v = seed % 256; d.data[p] = d.data[p + 1] = d.data[p + 2] = v; d.data[p + 3] = 255; }
+    g.putImageData(d, 0, 0);
+  }
+  ctx.save(); ctx.globalAlpha = alpha; ctx.globalCompositeOperation = "overlay"; ctx.fillStyle = ctx.createPattern(grainTile, "repeat"); ctx.fillRect(0, 0, W, H); ctx.restore();
+}
+function paintBackground(ctx, T, i) {
+  const g = ctx.createLinearGradient(0, 0, 0, H); T.stops.forEach(([o, c]) => g.addColorStop(o, c));
+  ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+  const k = i === 0 ? 1 : 0.72, cx = T.sun.x * W, cy = T.sun.y * H, R = T.sun.r * k;
+  const glow = ctx.createRadialGradient(cx, cy, R * 0.85, cx, cy, R * 4.4);
+  glow.addColorStop(0, hexA(T.sun.c, 0.5 * k)); glow.addColorStop(0.4, hexA(T.sun.c, 0.14 * k)); glow.addColorStop(1, hexA(T.sun.c, 0));
+  ctx.fillStyle = glow; ctx.fillRect(0, 0, W, H);
+  ctx.fillStyle = hexA(T.sun.c, i === 0 ? 1 : 0.8); ctx.beginPath(); ctx.arc(cx, cy, R, 0, Math.PI * 2); ctx.fill();
+  grain(ctx, 0.08);
+}
+const imgCache = {};
+function loadImage(url) {
+  if (!url) return Promise.resolve(null);
+  if (url in imgCache) return Promise.resolve(imgCache[url]);
+  return new Promise(res => { const im = new Image(); im.crossOrigin = "anonymous"; im.onload = () => res(imgCache[url] = im); im.onerror = () => res(imgCache[url] = null); im.src = url; });
+}
+function paintPhoto(ctx, im) {
+  const sc = Math.max(W / im.width, H / im.height), w = im.width * sc, h = im.height * sc;
+  ctx.drawImage(im, (W - w) / 2, (H - h) / 2, w, h);
+  const g = ctx.createLinearGradient(0, 0, 0, H);
+  g.addColorStop(0, "rgba(20,12,8,.25)"); g.addColorStop(0.35, "rgba(20,12,8,.05)"); g.addColorStop(0.62, "rgba(20,12,8,.5)"); g.addColorStop(1, "rgba(20,12,8,.88)");
+  ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+  grain(ctx, 0.06);
+}
+function drawSlide(cv, post, i) {
+  const ctx = cv.getContext("2d");
+  const photo = i === 0 && post.cover ? imgCache[post.cover] : null;
+  const base = THEMES[themeKey(post)];
+  const T = photo ? { ...base, fg: "#FFF6EA", soft: "rgba(255,246,234,.85)", foot: null } : base;
+  const slides = post.slides, n = slides.length, s = slides[i] || { h: "", b: "" };
+  const display = sz => `800 ${sz}px "Barlow Condensed", "Arial Narrow", sans-serif`;
+  const serif = (sz, it) => `${it ? "italic " : ""}400 ${sz}px "Newsreader", Georgia, serif`;
+  const ui = sz => `700 ${sz}px "Barlow", system-ui, sans-serif`;
+  ctx.textBaseline = "alphabetic"; spaced(ctx, 0);
+  if (photo) paintPhoto(ctx, photo); else paintBackground(ctx, T, i);
+  const maxW = W - M * 2;
+  const footer = right => {
+    ctx.font = ui(28); spaced(ctx, 1.5); ctx.fillStyle = T.foot || T.soft;
+    ctx.textAlign = "left"; ctx.fillText(settings.handle || "", M, H - 78);
+    ctx.textAlign = "right"; ctx.fillText(right, W - M, H - 78); ctx.textAlign = "left"; spaced(ctx, 0);
+    ctx.fillStyle = T.foot || T.accent; ctx.fillRect(M, H - 130, 64, 4);
+  };
+  if (i === 0) {
+    ctx.font = ui(28); spaced(ctx, 5); ctx.fillStyle = T.accent;
+    ctx.fillText((P[post.pillar]?.short || "").toUpperCase(), M, 186); spaced(ctx, 0);
+    const head = fit(ctx, (s.h || post.hook || "").toUpperCase(), display, maxW, 640, 168, 80, 0.94);
+    const sub = s.b ? fit(ctx, s.b, sz => serif(sz, true), maxW, 220, 50, 34, 1.3) : { s: 0, ls: [] };
+    const blockH = head.ls.length * head.s * 0.94 + (sub.ls.length ? 44 + sub.ls.length * sub.s * 1.3 : 0);
+    // With a photo, text sits low so the image reads first.
+    let y = (photo ? Math.max(330, H - 190 - blockH) : Math.max(330, (H - 170 - blockH) / 2 + 120)) + head.s * 0.8;
+    ctx.font = display(head.s); ctx.fillStyle = T.fg;
+    head.ls.forEach(l => { ctx.fillText(l, M, y); y += head.s * 0.94; });
+    if (sub.ls.length) { y += 44 - head.s * 0.94 + sub.s * 1.1; ctx.font = serif(sub.s, true); ctx.fillStyle = T.soft; sub.ls.forEach(l => { ctx.fillText(l, M, y); y += sub.s * 1.3; }); }
+    footer("SWIPE  →");
+    return;
+  }
+  const last = i === n - 1 && n > 2;
+  // Measure first so short slides sit in the optical center instead of hugging the top.
+  const headFont = sz => (last ? display(sz) : `700 ${sz}px "Barlow Condensed", "Arial Narrow", sans-serif`);
+  const mHead = fit(ctx, (s.h || "").toUpperCase(), headFont, maxW, last ? 420 : 330, last ? 130 : 100, 56, 0.98);
+  const topH = last ? 90 : 175;
+  const roomEst = H - 170 - (150 + topH + mHead.ls.length * mHead.s * 0.98 + 34);
+  const mBody = s.b && roomEst > 60 ? fit(ctx, s.b, sz => serif(sz, last), maxW, roomEst, 48, 30, 1.38) : null;
+  const total = topH + mHead.ls.length * mHead.s * 0.98 + (mBody ? 34 + mBody.ls.length * mBody.s * 1.38 : 0);
+  let y = Math.max(150, Math.round((H - 170 - 150 - total) * 0.42) + 150);
+  if (!last) {
+    ctx.font = display(150); ctx.fillStyle = T.accent; ctx.fillText(pad(i), M - 6, y + 105); y += 175;
+  } else {
+    ctx.font = ui(28); spaced(ctx, 5); ctx.fillStyle = T.accent; ctx.fillText("BEFORE YOU GO", M, y + 36); spaced(ctx, 0); y += 90;
+  }
+  const head = fit(ctx, (s.h || "").toUpperCase(), sz => (last ? display(sz) : `700 ${sz}px "Barlow Condensed", "Arial Narrow", sans-serif`), maxW, last ? 420 : 330, last ? 130 : 100, 56, 0.98);
+  ctx.font = last ? display(head.s) : `700 ${head.s}px "Barlow Condensed", "Arial Narrow", sans-serif`; ctx.fillStyle = T.fg;
+  y += head.s * 0.82; head.ls.forEach(l => { ctx.fillText(l, M, y); y += head.s * 0.98; });
+  y += 40 - head.s * 0.68;
+  const room = H - 170 - y;
+  if (s.b && room > 60) {
+    const body = fit(ctx, s.b, sz => serif(sz, last), maxW, room, 48, 30, 1.38);
+    ctx.font = serif(body.s, last); ctx.fillStyle = last ? T.soft : T.fg; y += body.s;
+    body.ls.forEach(l => { ctx.fillText(l, M, y); y += body.s * 1.38; });
+  }
+  footer(`${i + 1} / ${n}`);
+}
+async function drawPreviews() {
+  const box = $("#e-previews"); if (!box || !draft) return;
+  await Promise.all([loadFonts(), loadImage(draft.cover)]);
+  if (!draft.slides.length) { box.innerHTML = `<p class="muted">Slides appear here as you write them.</p>`; return; }
+  box.innerHTML = draft.slides.map((_, i) => `<figure><canvas width="${W}" height="${H}" aria-label="Slide ${i + 1} preview"></canvas><figcaption><span>Slide ${i + 1}</span><button data-save="${i}">Save PNG</button></figcaption></figure>`).join("");
+  box.querySelectorAll("canvas").forEach((cv, i) => drawSlide(cv, draft, i));
+}
+function slideBlob(i) {
+  const cv = document.createElement("canvas"); cv.width = W; cv.height = H; drawSlide(cv, draft, i);
+  return new Promise(r => cv.toBlob(r, "image/png"));
+}
+const slug = () => (draft.title || "post").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 40) || "post";
+async function offer(filename, blob) {
+  if (downloads) {
+    try { await downloads.save({ filename, data: blob }); toast("Saved " + filename); return; }
+    catch (e) {
+      if (e?.code === "declined") return;
+      if (e?.code === "rate_limited") { toast("A save prompt is already open"); return; }
+    }
+  }
+  // Fallback: show the image so it can be long-pressed or right-clicked to save.
+  const url = URL.createObjectURL(blob);
+  const box = $("#e-previews"); const fig = document.createElement("figure");
+  fig.innerHTML = blob.type === "image/png" ? `<img src="${url}" alt="${esc(filename)}"><figcaption>Long-press or right-click to save</figcaption>` : `<figcaption>Download is not available here. Save slides one at a time.</figcaption>`;
+  box.prepend(fig); toast("Saving files isn't available here");
+}
+async function saveSlide(i) { await Promise.all([loadFonts(), loadImage(draft.cover)]); offer(`${slug()}-${pad(i + 1)}.png`, await slideBlob(i)); }
+async function exportZip(btn) {
+  if (!draft.slides.length) return;
+  if (!window.JSZip) { toast("Zip export didn't load. Save slides one at a time."); return; }
+  btn.disabled = true; btn.textContent = "Packing…";
+  try {
+    await Promise.all([loadFonts(), loadImage(draft.cover)]);
+    const zip = new JSZip();
+    for (let i = 0; i < draft.slides.length; i++) zip.file(`${slug()}-${pad(i + 1)}.png`, await slideBlob(i));
+    const caption = draft.caption + (draft.hashtags.length ? "\n\n" + draft.hashtags.map(h => "#" + h).join(" ") : "");
+    zip.file("caption.txt", caption); zip.file("video-script.txt", draft.script || ""); zip.file("x-post.txt", draft.xpost || "");
+    await offer(`${slug()}.zip`, await zip.generateAsync({ type: "blob" }));
+  } finally { btn.disabled = false; btn.textContent = "Download all slides (.zip)"; }
+}
+
+/* ---------- Teleprompter ---------- */
+const pr = { speed: 3, size: 40, playing: false, last: 0, raf: 0, lock: null, countdown: 0 };
+try { Object.assign(pr, JSON.parse(localStorage.getItem("lie-prompter") || "{}"), { playing: false }); } catch {}
+function scriptHtml(text) {
+  return String(text || "").split("\n").map(l => l.trim()).filter(Boolean).map(l => {
+    const cue = l.match(/^\[\s*on screen:?\s*(.*?)\]$/i);
+    if (cue) return `<p class="cue">On screen · ${esc(cue[1])}</p>`;
+    const lab = l.match(/^(HOOK|CTA)\s*(\([^)]*\))?\s*:\s*(.*)$/i);
+    if (lab) return `<p><span class="lbl">${esc(lab[1])}</span>${esc(lab[3])}</p>`;
+    return `<p>${esc(l)}</p>`;
+  }).join("");
+}
+function prSettings() {
+  $("#pr-text").style.setProperty("--pr-size", pr.size + "px"); $("#pr-speed").textContent = pr.speed;
+  try { localStorage.setItem("lie-prompter", JSON.stringify({ speed: pr.speed, size: pr.size, mirror: pr.mirror })); } catch {}
+}
+function openPrompter(text) {
+  if (!String(text || "").trim()) { toast("Write or draft a script first"); return; }
+  $("#pr-text").innerHTML = scriptHtml(text);
+  const box = $("#prompter"); box.hidden = false; box.classList.toggle("mirror", !!pr.mirror);
+  $("#pr-mirror").setAttribute("aria-pressed", !!pr.mirror);
+  $("#pr-scroll").scrollTop = 0; prSettings(); prStop();
+  document.body.style.overflow = "hidden";
+  navigator.wakeLock?.request("screen").then(l => pr.lock = l).catch(() => {});
+}
+function closePrompter() { prStop(); clearInterval(pr.countdown); $("#pr-count").hidden = true; $("#prompter").hidden = true; document.body.style.overflow = ""; pr.lock?.release?.().catch(() => {}); pr.lock = null; }
+function prStop() { pr.playing = false; cancelAnimationFrame(pr.raf); $("#pr-play").textContent = "Start"; }
+function prTick(t) {
+  if (!pr.playing) return;
+  const sc = $("#pr-scroll"), dt = pr.last ? (t - pr.last) / 1000 : 0; pr.last = t;
+  sc.scrollTop += pr.speed * 16 * dt;
+  if (sc.scrollTop + sc.clientHeight >= sc.scrollHeight - 2) { prStop(); return; }
+  pr.raf = requestAnimationFrame(prTick);
+}
+function prPlay() {
+  if (pr.playing) { prStop(); return; }
+  const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  let n = reduce ? 0 : 3; const c = $("#pr-count");
+  const go = () => { c.hidden = true; pr.playing = true; pr.last = 0; $("#pr-play").textContent = "Pause"; pr.raf = requestAnimationFrame(prTick); };
+  if (!n) return go();
+  c.hidden = false; c.textContent = n; $("#pr-play").textContent = "…";
+  clearInterval(pr.countdown);
+  pr.countdown = setInterval(() => { n--; if (n <= 0) { clearInterval(pr.countdown); go(); } else c.textContent = n; }, 800);
+}
+$("#prompter").addEventListener("click", e => {
+  const b = e.target.closest("button");
+  if (!b) { if (e.target.closest("#pr-scroll")) prPlay(); return; }
+  if (b.id === "pr-play") prPlay();
+  else if (b.id === "pr-close") closePrompter();
+  else if (b.id === "pr-restart") { prStop(); $("#pr-scroll").scrollTop = 0; }
+  else if (b.id === "pr-mirror") { pr.mirror = !pr.mirror; b.setAttribute("aria-pressed", pr.mirror); $("#prompter").classList.toggle("mirror", pr.mirror); prSettings(); }
+  else if (b.dataset.pr) {
+    const [k, d] = b.dataset.pr.split(","); const dir = Number(d);
+    if (k === "speed") pr.speed = Math.min(10, Math.max(1, pr.speed + dir)); else pr.size = Math.min(72, Math.max(24, pr.size + dir * 4));
+    prSettings();
+  }
+});
+document.addEventListener("keydown", e => {
+  if ($("#prompter").hidden) return;
+  if (e.key === "Escape") closePrompter();
+  else if (e.key === " " && e.target === document.body) { e.preventDefault(); prPlay(); }
+});
+
+/* ---------- Playbook ---------- */
+function renderPlaybook() {
+  $("#v-playbook").innerHTML = `
+    <div class="panel" style="padding:clamp(18px,4vw,36px)">
+      <p class="eyebrow">The mission</p>
+      <p class="thesis">Change the world <em>one fellow man at a time</em>. Health, faith, and a rooted life, shown daily, at volume, with integrity.</p>
+    </div>
+    <div class="panel fields">
+      <div><h2 style="font-size:26px">Who every post is for</h2><p class="muted" style="margin:6px 0 0">Bloom's first lesson: speak to one specific person. Claude reads this line before every post it writes.</p></div>
+      <label class="f" for="set-niche">Niche statement<textarea id="set-niche" rows="2">${esc(settings.niche)}</textarea></label>
+      <div class="grid3">
+        <label class="f" for="set-handle">Handle on slides<input type="text" id="set-handle" value="${esc(settings.handle)}"></label>
+        <label class="f" for="set-start">Sprint starts<input type="date" id="set-start" value="${esc(settings.sprintStart)}"></label>
+        <label class="f" for="set-theme">Default slide theme<select id="set-theme"><option value="auto"${THEMES[settings.theme] ? "" : " selected"}>Auto by pillar</option>${Object.entries(THEMES).map(([k, t]) => `<option value="${k}"${k === settings.theme ? " selected" : ""}>${t.label}</option>`).join("")}</select></label>
+      </div>
+      <div class="row"><button class="btn primary" id="set-save">Save settings</button></div>
+    </div>
+    <div class="panel fields" id="voicepanel">
+      <div><h2 style="font-size:26px">Your voice, as Claude knows it</h2>
+      <p class="muted" style="margin:6px 0 0">Claude reads this guide and your ${voiceExamples().length} best approved posts before writing anything. When you edit a Claude draft and mark it ready, that edit becomes a lesson. Run “Learn from my edits” every week or two.</p></div>
+      <label class="f" for="voice-notes">Voice guide<textarea id="voice-notes" rows="7" placeholder="Empty for now. Edit a few Claude drafts, mark them ready, then press Learn from my edits.">${esc(voice.notes)}</textarea></label>
+      <div class="row"><button class="btn primary" id="voice-save">Save guide</button><button class="btn sun" id="voice-learn" ${sampleFn ? "" : "disabled"}>Learn from my edits</button><span class="muted" style="font-size:13px">${learnablePairs().length} edited drafts to learn from${voice.updated ? ` · updated ${esc(new Date(voice.updated).toLocaleDateString())}` : ""}</span></div>
+      <div id="voice-proposal" hidden></div>
+    </div>
+    <div class="pb">
+      <div class="panel"><h2>Bloom's playbook, applied</h2><ol>
+        <li class="lesson"><b>Grow the community, not the sale.</b>Every CTA asks for a save, share, or follow. Products show up as things you use, in at most 1 post in 5.</li>
+        <li class="lesson"><b>Measure beyond views.</b>Saves and shares mean it was useful. Follows mean they want more of you. Check the first hour after posting.</li>
+        <li class="lesson"><b>Systems remove confusion.</b>One idea a day, one way to make it, one place to track it. The plan decides; you execute.</li>
+        <li class="lesson"><b>There's no such thing as too late.</b>Christian health content exists. Yours, with this exact mix of faith, real food, and rhythms, doesn't yet.</li>
+        <li class="lesson"><b>Don't be sloppy.</b>No disease claims, no fake urgency, no black-hat. A clean reputation is the asset.</li>
+        <li class="lesson"><b>Build a platform, not a post.</b>Name your recurring series (Created Rhythms, The Faithful Table). Series become products later.</li>
+        <li class="lesson"><b>Outside voices don't matter.</b>Lock in for 30 days. Judge the work at the end, not by day 4's views.</li>
+      </ol></div>
+      <div class="panel"><h2>Voice</h2><ul>
+        <li>First person. A brother a few steps ahead, not a guru.</li>
+        <li>Conviction without self-righteousness. Grace in every correction.</li>
+        <li>Faith woven into the worldview, not stapled to the end.</li>
+        <li>Short sentences. Concrete examples from your real week.</li>
+        <li>No cursing, no insults, no mocking people who disagree.</li>
+        <li>Health is a means to love God and serve people. Never the idol.</li>
+      </ul>
+      <h2 style="margin-top:20px">Before you post</h2><ul>
+        <li>Scripture quoted correctly, with the reference.</li>
+        <li>No food, product, or habit "cures" anything.</li>
+        <li>Product mentions disclosed, and only things you actually use.</li>
+        <li>Would you send this to a friend who needs it?</li>
+      </ul></div>
+      <div class="panel"><h2>Sunday review · 20 minutes</h2><ol>
+        <li>Log saves, shares, and follows for the week's posts.</li>
+        <li>Find the top two posts on "What's landing." Why did they work: the hook, the topic, or the format?</li>
+        <li>Make two more posts in that lane next week.</li>
+        <li>Check the pillar mix. Fill under-target pillars first.</li>
+        <li>Hit "Fill empty days," then draft the next 7 in one sitting.</li>
+        <li>Batch-film the 7 video scripts in one session.</li>
+      </ol></div>
+      <div class="panel"><h2>Products in rotation</h2><p class="muted">Tie-ins come from this list and only when you actually use the product.</p>
+        <div class="angles">${PRODUCTS.map(p => `<span class="chip">${esc(p)}</span>`).join("")}</div></div>
+    </div>`;
+}
+function learnablePairs() {
+  const norm = x => String(x || "").replace(/\s+/g, " ").trim();
+  return posts.filter(p => p.ai && (p.status === "ready" || p.status === "posted") &&
+    (norm(p.ai.hook) !== norm(p.hook) || norm(p.ai.caption) !== norm(p.caption) || norm(p.ai.xpost) !== norm(p.xpost)));
+}
+async function learnVoice(btn) {
+  const pairs = learnablePairs().slice(-10);
+  const box = $("#voice-proposal");
+  if (!pairs.length) { box.hidden = false; box.innerHTML = `<p class="note">Nothing to learn from yet. Edit a Claude-written post in Studio, then set its status to ready.</p>`; return; }
+  btn.disabled = true; btn.textContent = "Studying your edits…";
+  try {
+    const r = await sampleFn.json(`You maintain the voice guide for a Christian holistic-health creator. Compare what Claude drafted with what he actually approved, and update the guide so future drafts need fewer edits.
+
+CURRENT GUIDE:
+${voice.notes || "(empty)"}
+
+DRAFT vs APPROVED:
+${pairs.map((p, i) => `#${i + 1}
+Claude hook: ${p.ai.hook}
+His hook: ${p.hook}
+Claude caption: ${p.ai.caption}
+His caption: ${p.caption}
+Claude X post: ${p.ai.xpost}
+His X post: ${p.xpost}`).join("\n\n")}
+
+Write concrete, observable rules (word choices he cuts or adds, sentence length, how he opens, how he uses Scripture, what he never says). Keep what still holds from the current guide. Max 180 words, as short "- " bullet lines.
+Reply with only JSON: {"notes": "the full updated guide", "learned": ["1 to 4 short phrases naming what changed"]}`, { modelTier: "complex", cache: false });
+    const notes = String(r?.notes || "").trim();
+    if (!notes) throw { message: "Claude returned an empty guide. Try again." };
+    box.hidden = false;
+    box.innerHTML = `<p class="eyebrow" style="margin:0 0 6px">Proposed guide${Array.isArray(r.learned) && r.learned.length ? ` · learned: ${esc(r.learned.join("; "))}` : ""}</p>
+      <textarea id="voice-new" rows="8">${esc(notes)}</textarea>
+      <div class="row" style="margin-top:8px"><button class="btn primary" id="voice-accept">Use this guide</button><button class="btn ghost" id="voice-reject">Keep current</button></div>`;
+  } catch (e) { box.hidden = false; box.innerHTML = `<p class="err">${esc(sampleError(e))}</p>`; }
+  btn.disabled = false; btn.textContent = "Learn from my edits";
+}
+$("#v-playbook").addEventListener("click", async e => {
+  const id = e.target.id;
+  if (id === "voice-learn") return learnVoice(e.target);
+  if (id === "voice-save" || id === "voice-accept") {
+    voice.notes = (id === "voice-accept" ? $("#voice-new") : $("#voice-notes")).value.trim();
+    try { await store.saveVoice(); toast("Voice guide saved"); renderPlaybook(); } catch { toast("Couldn't save the guide. You may have view-only access."); }
+    return;
+  }
+  if (id === "voice-reject") { $("#voice-proposal").hidden = true; return; }
+  if (e.target.id !== "set-save") return;
+  settings = { ...settings, niche: $("#set-niche").value.trim() || DEFAULT_SETTINGS.niche, handle: $("#set-handle").value.trim(), sprintStart: $("#set-start").value || settings.sprintStart, theme: $("#set-theme").value };
+  try { await store.saveSettings(); toast("Settings saved"); } catch { toast("Couldn't save settings. You may have view-only access."); }
+});
+
+/* ---------- Boot ---------- */
+renderPlaybook();
+route();
+onData();
+store.init();
+</script>

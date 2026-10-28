@@ -1,0 +1,7 @@
+{
+  "name": "lock-in-engine",
+  "private": true,
+  "description": "Post kits and video edits for the Lock-In content engine",
+  "scripts": { "kit": "node kit/render.js" },
+  "dependencies": { "playwright": "^1.47.0" }
+}

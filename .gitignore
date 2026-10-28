@@ -1,0 +1,6 @@
+__pycache__/
+node_modules/
+out/
+*.mp4
+*.mov
+*.srt
