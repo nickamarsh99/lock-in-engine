@@ -5,6 +5,18 @@ The production side of a faith and holistic-health content brand. The **engine p
 - Engine page: https://claude.ai/artifact/SWZJ8k6iS6YNqGyMpxrtty (source: `engine/lock-in-engine.html`)
 - Posts, settings, and the voice guide live in the page's database: `posts/*`, `settings/main`, `voice/profile`
 
+## The engine page
+
+| Tab | What it's for |
+| --- | --- |
+| Sprint | 30-day calendar, pillar mix, what's landing |
+| Bank | Ideas → Drafts → Ready → Posted. Runway meter, Plan 10 ideas, batch drafting |
+| Studio | Edit a post: slides, photos, looks, caption, script, X post, finished video, results |
+| Generate | Claude writes a post in any format (carousel, quote, reel, text) |
+| Tree | Mind map of pillars, niches, series, ideas, inspiration, brands, values |
+| Inspire | Private prayer journal that surfaces post ideas, and a swipe file of posts you admire |
+| Playbook | Voice guide, settings, Bloom lessons, Sunday review |
+
 ## Daily flow (semi-automatic)
 
 1. **Write.** Studio in the engine page. Claude drafts from your pillars, voice guide, and best posts.

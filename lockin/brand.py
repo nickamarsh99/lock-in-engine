@@ -42,6 +42,9 @@ def paint_background(theme, w, h, sun_scale=1.0):
     img = line.resize((w, h))
 
     sun = theme["sun"]
+    if not sun["r"]:
+        noise = Image.effect_noise((w, h), 48).convert("RGB")
+        return Image.blend(img, ImageChops.overlay(img, noise), 0.1)
     cx, cy = sun["x"] * w, sun["y"] * h
     r = sun["r"] * (w / 1080) * sun_scale
     # Same falloff as the page's canvas glow: 50% at the disk edge, 14% at 40%, gone at 4.4x radius.

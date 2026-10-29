@@ -64,6 +64,8 @@ main { padding-block: 22px 60px }
 .btn.danger { color: var(--danger) }
 .btn:disabled { opacity: .5; cursor: default }
 label.f { display: grid; gap: 4px; font-size: 13px; font-weight: 600; color: var(--muted) }
+label.f input, label.f select, label.f textarea { font-size: 15px; font-weight: 400; color: var(--ink) }
+label.f .journal-text { font-size: 18px }
 input[type=text], input[type=date], input[type=number], select, textarea {
   background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; width: 100%; min-width: 0 }
 textarea { resize: vertical; line-height: 1.45 }
@@ -190,6 +192,62 @@ textarea { resize: vertical; line-height: 1.45 }
 .pr-bar button.go { background: #F2A35E; color: #1A1512; border-color: #F2A35E; min-width: 86px }
 .pr-bar button[aria-pressed="true"] { border-color: #F2A35E; color: #F2A35E }
 .pr-bar .grp { display: inline-flex; gap: 4px; align-items: center; color: #BFAF9F }
+/* Content bank */
+.runway { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 6px 22px; align-items: center }
+.runway .big { font-family: var(--f-display); font-weight: 800; font-size: 64px; line-height: .9; font-variant-numeric: tabular-nums }
+.runway .big small { display: block; font-size: 14px; letter-spacing: .1em; color: var(--muted); font-weight: 700 }
+.runway .meter { height: 10px; margin-top: 8px }
+.runway .meter i { transition: width .3s }
+.runway.low .big { color: var(--danger) }
+.runway.low .meter i { background: var(--danger) }
+.chips { display: flex; flex-wrap: wrap; gap: 6px }
+.chips button { border: 1px solid var(--line); background: var(--surface); border-radius: 999px; padding: 4px 12px; font-size: 13px; font-weight: 600 }
+.chips button[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink) }
+.board { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; align-items: start }
+@media (max-width: 1100px) { .board { grid-template-columns: repeat(2, minmax(0, 1fr)) } }
+@media (max-width: 620px) { .board { grid-template-columns: minmax(0, 1fr) } .col[data-col="ready"] { order: -1 } }
+.col { background: color-mix(in srgb, var(--surface) 55%, var(--bg)); border: 1px solid var(--line); border-radius: var(--r); padding: 10px; display: grid; gap: 10px; min-height: 120px }
+.col.drop { border-color: var(--sun); box-shadow: inset 0 0 0 2px var(--sun-soft) }
+.col-h { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 2px 4px }
+.col-h h3 { font-size: 19px }
+.col-h .n { font-family: var(--f-display); font-weight: 700; color: var(--muted); font-size: 17px }
+.bcard { background: var(--surface); border: 1px solid var(--line); border-radius: 9px; padding: 10px; display: grid; grid-template-columns: 64px minmax(0, 1fr); gap: 10px; cursor: grab }
+.bcard.sel { border-color: var(--sun); box-shadow: 0 0 0 1px var(--sun) }
+.bcard.dragging { opacity: .45 }
+.bcard .thumb { width: 64px; aspect-ratio: 4 / 5; border-radius: 5px; display: block; background: var(--bg); border: 1px solid var(--line) }
+.bcard .thumb.ph { display: grid; place-items: center; font-family: var(--f-display); font-weight: 800; font-size: 13px; color: var(--muted); text-transform: uppercase; text-align: center; padding: 4px; line-height: 1 }
+.bcard .meta { display: flex; flex-wrap: wrap; gap: 4px 8px; align-items: center; font-size: 11px; color: var(--muted); font-weight: 700; letter-spacing: .04em; text-transform: uppercase }
+.bcard h4 { margin: 3px 0 2px; font-size: 14px; line-height: 1.25; overflow-wrap: anywhere }
+.bcard .hk { margin: 0; font-size: 12.5px; color: var(--muted); line-height: 1.3; overflow-wrap: anywhere; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden }
+.bcard .need { margin: 4px 0 0; font-size: 12px; color: var(--danger); font-weight: 600 }
+.bcard .acts { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 6px; align-items: center }
+.bcard .acts .btn { padding: 3px 9px; font-size: 12.5px }
+.bcard .when { font-size: 12px; font-weight: 700; color: var(--pine); margin-left: auto }
+.bcard input[type=checkbox] { accent-color: var(--sun); width: 16px; height: 16px }
+.fmt { border: 1px solid currentColor; border-radius: 4px; padding: 0 5px; font-size: 10px }
+.busybar { display: flex; gap: 10px; align-items: center; background: var(--sun-soft); border-radius: var(--r); padding: 10px 14px; font-weight: 600 }
+
+/* Inspire */
+.ins { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 18px; align-items: start }
+@media (max-width: 900px) { .ins { grid-template-columns: minmax(0, 1fr) } }
+.journal-text { font-family: var(--f-serif); font-size: 18px; line-height: 1.6; min-height: 300px; background: var(--surface) }
+.entries { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; max-height: 560px; overflow: auto }
+.entries button { width: 100%; text-align: left; border: 1px solid transparent; background: none; border-radius: 8px; padding: 8px 10px; display: grid; gap: 2px }
+.entries button:hover { background: var(--bg) }
+.entries button.sel { border-color: var(--sun); background: var(--sun-soft) }
+.entries .d { font-size: 12px; font-weight: 700; color: var(--muted); letter-spacing: .04em; text-transform: uppercase }
+.entries .l { font-family: var(--f-serif); overflow: hidden; text-overflow: ellipsis; white-space: nowrap }
+.idea-out { display: grid; gap: 8px }
+.idea-out article { border: 1px solid var(--line); border-radius: 9px; padding: 10px 12px; display: grid; gap: 4px; background: var(--bg) }
+.swipe-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px }
+.swipe-card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); overflow: hidden; display: grid; grid-template-rows: auto 1fr }
+.swipe-card .shots { display: flex; gap: 2px; overflow-x: auto; background: var(--bg); scroll-snap-type: x mandatory }
+.swipe-card .shots img { height: 240px; width: auto; max-width: none; flex: none; scroll-snap-align: start; display: block }
+.swipe-card .body { padding: 12px 14px; display: grid; gap: 6px; font-size: 13.5px; align-content: start }
+.swipe-card dl { margin: 0; display: grid; gap: 6px }
+.swipe-card dt { font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--muted) }
+.swipe-card dd { margin: 0; overflow-wrap: anywhere }
+
 /* Content tree */
 .tree-head { display: flex; flex-wrap: wrap; gap: 10px; align-items: center }
 .tree-head input[type=search] { flex: 1 1 220px; max-width: 360px; background: var(--surface); border: 1px solid var(--line); border-radius: 999px; padding: 8px 14px }
@@ -239,9 +297,11 @@ textarea { resize: vertical; line-height: 1.45 }
     <span class="daybadge" id="daybadge"></span>
     <nav aria-label="Views">
       <a href="#sprint" data-v="sprint">Sprint</a>
+      <a href="#bank" data-v="bank">Bank</a>
       <a href="#studio" data-v="studio">Studio</a>
       <a href="#generate" data-v="generate">Generate</a>
       <a href="#tree" data-v="tree">Tree</a>
+      <a href="#inspire" data-v="inspire">Inspire</a>
       <a href="#playbook" data-v="playbook">Playbook</a>
     </nav>
   </div>
@@ -249,9 +309,11 @@ textarea { resize: vertical; line-height: 1.45 }
 
 <main class="wrap">
   <section class="view" id="v-sprint"></section>
+  <section class="view" id="v-bank" hidden></section>
   <section class="view" id="v-studio" hidden></section>
   <section class="view" id="v-generate" hidden></section>
   <section class="view" id="v-tree" hidden></section>
+  <section class="view" id="v-inspire" hidden></section>
   <section class="view" id="v-playbook" hidden></section>
 </main>
 <div id="toast" class="toast" hidden></div>
@@ -324,11 +386,14 @@ const THEMES = {
   clay:   { label: "Clay",         stops: [[0, "#B35E3E"], [0.6, "#86412B"], [1, "#4A2318"]],                    fg: "#FCEDE0", accent: "#F7C27C", soft: "rgba(252,237,224,.8)",  sun: { x: .84, y: .13, r: 90,  c: "#F3A35F" } },
   dusk:   { label: "Dusk",         stops: [[0, "#11172E"], [0.55, "#2B2A52"], [0.84, "#7E4567"], [1, "#E08A62"]], fg: "#FFF2E4", accent: "#F6B068", soft: "rgba(255,242,228,.78)", foot: "#20131F", sun: { x: .5, y: 1.03, r: 170, c: "#FFB673" } },
   linen:  { label: "Linen Sun",    stops: [[0, "#F6EFE3"], [1, "#EEDFC9"]],                                      fg: "#3A2516", accent: "#BC5C27", soft: "rgba(58,37,22,.74)",    sun: { x: .82, y: .16, r: 120, c: "#F2A35E" } },
+  ember:  { label: "Ember",        stops: [[0, "#17120F"], [0.6, "#231913"], [1, "#3F2416"]],                    fg: "#F4E9DC", accent: "#E9A25A", soft: "rgba(244,233,220,.78)", sun: { x: .5, y: 1.05, r: 170, c: "#D9733A" } },
+  journal:{ label: "Journal",      stops: [[0, "#F4EFE5"], [1, "#ECE3D3"]],                                      fg: "#2B2620", accent: "#8C5A2B", soft: "rgba(43,38,32,.72)", sun: { x: .5, y: .5, r: 0, c: "#000000" }, serif: true },
   pine:   { label: "Evening Pine", stops: [[0, "#24432F"], [1, "#152A1F"]],                                      fg: "#F2EEE3", accent: "#E8B04B", soft: "rgba(242,238,227,.74)", sun: { x: .85, y: .13, r: 70,  c: "#E8B04B" } },
 };
 // "Auto" picks a look per pillar so the grid reads as one family with variety.
 const PILLAR_THEME = { 1: "dusk", 2: "dawn", 3: "sage", 4: "golden", 5: "clay", 6: "linen", 7: "golden", 8: "pine" };
-const themeKey = post => THEMES[post.theme] ? post.theme : THEMES[settings.theme] ? settings.theme : PILLAR_THEME[post.pillar] || "dawn";
+const FORMATS = { carousel: "Carousel", quote: "Quote", reel: "Reel", text: "Text post" };
+const themeKey = post => THEMES[post.theme] ? post.theme : THEMES[settings.theme] ? settings.theme : post.format === "quote" ? (post.pillar === 1 ? "journal" : "ember") : PILLAR_THEME[post.pillar] || "dawn";
 const themeSwatch = k => `linear-gradient(180deg, ${THEMES[k].stops.map(([o, c]) => `${c} ${Math.round(o * 100)}%`).join(", ")})`;
 const DEFAULT_SETTINGS = {
   handle: "@yourhandle",
@@ -357,18 +422,19 @@ async function copy(text, label = "Copied") {
   catch { const ta = document.createElement("textarea"); ta.value = text; document.body.append(ta); ta.select(); try { document.execCommand("copy"); toast(label); } catch { toast("Select the text and copy it"); } ta.remove(); }
 }
 function blankPost(extra = {}) {
-  return { pillar: 2, title: "", hook: "", status: "idea", date: "", slides: [], caption: "", hashtags: [], script: "", xpost: "",
+  return { pillar: 2, format: "carousel", title: "", hook: "", status: "idea", date: "", slides: [], caption: "", hashtags: [], script: "", xpost: "",
     placements: {}, metrics: {}, notes: "", theme: "", ...extra };
 }
 
 /* ---------- Store: shared db when available, this browser otherwise ---------- */
 let posts = [], settings = { ...DEFAULT_SETTINGS }, db = null, sampleFn = null, downloads = null, assets = null, storeMode = "loading";
 let voice = { notes: "" };
+let journal = [], journalPath = null, swipe = [], userCap = null;
 const store = {
   async init() {
     const cl = window.claude;
     if (cl?.use) {
-      [db, sampleFn, downloads, assets] = await Promise.all(["db", "sample", "downloads", "assets"].map(n => cl.use(n).catch(() => null)));
+      [db, sampleFn, downloads, assets, userCap] = await Promise.all(["db", "sample", "downloads", "assets", "user"].map(n => cl.use(n).catch(() => null)));
     }
     if (db) {
       storeMode = "db";
@@ -380,10 +446,17 @@ const store = {
       db.collection("tree").onSnapshot(snap => {
         tree = snap.docs.map(d => ({ ...structuredClone(d.data()), id: d.id })); treeReady = true; onTreeData();
       }, () => { treeReady = true; onTreeData(); });
+      db.collection("swipe").onSnapshot(snap => { swipe = snap.docs.map(d => ({ ...structuredClone(d.data()), id: d.id })); onInspireData(); }, () => {});
+      // The journal lives under the viewer's private path: nobody else who opens this page can read it.
+      userCap?.id?.().then(uidv => {
+        if (!uidv) return;
+        journalPath = "data/users/" + uidv;
+        db.collection(journalPath).where("type", "==", "journal").onSnapshot(snap => { journal = snap.docs.map(d => ({ ...structuredClone(d.data()), id: d.id })); onInspireData(); }, () => {});
+      }).catch(() => {});
       db.doc("voice/profile").onSnapshot(s => { if (s.exists) voice = { notes: "", ...structuredClone(s.data()) }; if (!$("#v-playbook").contains(document.activeElement)) renderPlaybook(); });
     } else {
       storeMode = "local";
-      try { posts = JSON.parse(localStorage.getItem("lie-posts") || "[]"); settings = { ...DEFAULT_SETTINGS, ...JSON.parse(localStorage.getItem("lie-settings") || "{}") }; voice = { notes: "", ...JSON.parse(localStorage.getItem("lie-voice") || "{}") }; tree = JSON.parse(localStorage.getItem("lie-tree") || "[]"); } catch {}
+      try { posts = JSON.parse(localStorage.getItem("lie-posts") || "[]"); settings = { ...DEFAULT_SETTINGS, ...JSON.parse(localStorage.getItem("lie-settings") || "{}") }; voice = { notes: "", ...JSON.parse(localStorage.getItem("lie-voice") || "{}") }; tree = JSON.parse(localStorage.getItem("lie-tree") || "[]"); journal = JSON.parse(localStorage.getItem("lie-journal") || "[]"); swipe = JSON.parse(localStorage.getItem("lie-swipe") || "[]"); } catch {}
       treeReady = true; onTreeData();
       onData();
     }
@@ -415,6 +488,23 @@ const store = {
     tree = tree.filter(x => x.id !== id);
     try { localStorage.setItem("lie-tree", JSON.stringify(tree)); } catch {}
     onTreeData();
+  },
+  async saveDoc(kind, item) {
+    const { id, ...body } = item; body.updated = new Date().toISOString();
+    const list = kind === "journal" ? journal : swipe;
+    if (storeMode === "db") {
+      if (kind === "journal" && !journalPath) throw { message: "Sign in to claude.ai to keep a private journal." };
+      return db.collection(kind === "journal" ? journalPath : "swipe").doc(id).set(kind === "journal" ? { ...body, type: "journal" } : body);
+    }
+    const i = list.findIndex(x => x.id === id); if (i >= 0) list[i] = { ...item, ...body }; else list.push({ ...item, ...body });
+    try { localStorage.setItem("lie-" + kind, JSON.stringify(list)); } catch {}
+    onInspireData();
+  },
+  async removeDoc(kind, id) {
+    if (storeMode === "db") return db.collection(kind === "journal" ? journalPath : "swipe").doc(id).delete();
+    if (kind === "journal") journal = journal.filter(x => x.id !== id); else swipe = swipe.filter(x => x.id !== id);
+    try { localStorage.setItem("lie-" + kind, JSON.stringify(kind === "journal" ? journal : swipe)); } catch {}
+    onInspireData();
   },
   async saveVoice() {
     voice.updated = new Date().toISOString();
@@ -453,7 +543,7 @@ function nextEmptyDate() {
 }
 
 /* ---------- Routing ---------- */
-const VIEWS = ["sprint", "studio", "generate", "tree", "playbook"];
+const VIEWS = ["sprint", "bank", "studio", "generate", "tree", "inspire", "playbook"];
 let view = "sprint";
 function route() {
   const h = location.hash.slice(1);
@@ -463,6 +553,8 @@ function route() {
   if (view === "studio") renderStudio();
   if (view === "generate") renderGenerate();
   if (view === "tree") renderTree();
+  if (view === "bank") renderBank();
+  if (view === "inspire") renderInspire();
   window.scrollTo(0, 0);
 }
 window.addEventListener("hashchange", route);
@@ -473,6 +565,7 @@ function onData() {
   $("#daybadge").innerHTML = day > 0 ? `Day <b>${day}</b> / ${settings.sprintDays}` : `Starts ${esc(fmtDay(settings.sprintStart))}`;
   renderSprint();
   if (!$("#v-playbook").contains(document.activeElement)) renderPlaybook();
+  if (view === "bank" && !bankBusy) renderBank();
   if (view === "studio") { if (!draft || draft.id !== selectedId || !$("#e-title")) renderStudio(); else renderStudioList(); }
 }
 
@@ -579,25 +672,54 @@ function voiceBlock() {
     (ex.length ? `\n\nPOSTS HE APPROVED (match this voice, don't copy the topics):\n${ex.map(p => `- Hook: ${p.hook}\n  Caption: ${p.caption.slice(0, 420).replace(/\n+/g, " / ")}`).join("\n")}` : "");
 }
 const aiSnapshot = r => ({ hook: r.hook, caption: r.caption, xpost: r.xpost, script: r.script, slides: r.slides.map(x => x.h) });
-const SHAPE = `Reply with only JSON in this exact shape:
+const SHAPE_COMMON = `"caption": "80-180 words. First line restates the hook. Practical. Ends with one question that invites a comment.",
+ "hashtags": ["3 to 5 tags without #"],
+ "xpost": "one post for X, max 270 characters, no hashtags"`;
+const SHAPES = {
+  carousel: `Reply with only JSON in this exact shape:
 {"title": "internal name, max 8 words",
  "hook": "the scroll-stopping first line, max 12 words, specific, no clickbait",
  "slides": [{"h": "headline", "b": "body"}],
- "caption": "80-180 words. First line restates the hook. Practical. Ends with one question that invites a comment.",
- "hashtags": ["3 to 5 tags without #"],
- "script": "30-45 second talking-head script for Reels/TikTok/Shorts. Lines: HOOK (0-3s): ... then [ON SCREEN: ...] cues and short beats, then CTA: ...",
- "xpost": "one post for X, max 270 characters, no hashtags"}
-Slides: 6 to 8 total. Slide 1: h = the hook, b = one short line that makes them swipe. Middle slides: one idea each, h max 7 words, b max 38 words, concrete and practical. Last slide: h invites a save, share, or follow (never a purchase), b one warm sentence.`;
-function postPrompt({ pillar, angle, title, hook, product }) {
+ ${SHAPE_COMMON},
+ "script": "30-45 second talking-head script for Reels/TikTok/Shorts. Lines: HOOK (0-3s): ... then [ON SCREEN: ...] cues and short beats, then CTA: ..."}
+Slides: 6 to 8 total. Slide 1: h = the hook, b = one short line that makes them swipe. Middle slides: one idea each, h max 7 words, b max 38 words, concrete and practical. Last slide: h invites a save, share, or follow (never a purchase), b one warm sentence.`,
+  quote: `This is a QUOTE post: one strong statement set large on a single image, like a page from a journal. Mindset, conviction, and faith, said plainly.
+Reply with only JSON in this exact shape:
+{"title": "internal name, max 8 words",
+ "hook": "the statement itself",
+ "slides": [{"h": "the statement, 8-26 words, sentence case, no hashtags or emoji", "b": "attribution: a Scripture reference if it quotes Scripture, otherwise empty"}],
+ ${SHAPE_COMMON},
+ "script": "20-30 second talking-head script that unpacks the statement. HOOK (0-3s): ... beats ... CTA: ..."}
+Exactly 1 slide, or up to 3 if they build one idea in sequence. Original lines in his voice; quote Scripture only word-for-word with its reference.`,
+  reel: `This is a REEL: the video is the post. Write for filming in one take with b-roll.
+Reply with only JSON in this exact shape:
+{"title": "internal name, max 8 words",
+ "hook": "the first spoken line, max 12 words",
+ "slides": [{"h": "cover text for the reel thumbnail, max 7 words", "b": ""}],
+ ${SHAPE_COMMON},
+ "script": "30-60 second script. Lines: HOOK (0-3s): ... then short spoken beats, with [ON SCREEN: ...] text cues and [B-ROLL: ...] shot ideas (cooking, training, outdoors, morning light, Bible on the table), then CTA: ..."}
+Exactly 1 slide (the cover).`,
+  text: `This is a TEXT post for X, Threads, or an IG text post. No images.
+Reply with only JSON in this exact shape:
+{"title": "internal name, max 8 words",
+ "hook": "the first line, max 12 words",
+ "slides": [],
+ "caption": "a 4-10 line text post for Threads or IG. Short lines. One idea. Ends with a question.",
+ "hashtags": [],
+ "xpost": "the X version, max 270 characters, no hashtags",
+ "script": ""}`,
+};
+const SHAPE = SHAPES.carousel;
+function postPrompt({ pillar, angle, title, hook, product, format = "carousel", model }) {
   const p = P[pillar];
   return `${brief()}
 
 Pillar: ${p.name}. Purpose: ${p.purpose}
 Sub-topics in this pillar: ${p.subs.join("; ")}.
 ${angle ? `Angle: ${angle}` : ""}${title ? `\nWorking title: ${title}` : ""}${hook ? `\nHook to build on: ${hook}` : ""}
-${product ? `Work in ${product} naturally as something he personally uses, in one slide at most and in the caption, with a plain disclosure line in the caption ("I partner with ${product}" style). The post must stand on its own without the product.` : "Do not mention any brand or product."}
+${model ? `Model the STRUCTURE (not the words or topic) on this post he admires:\n${model}\n` : ""}${product ? `Work in ${product} naturally as something he personally uses, in one slide at most and in the caption, with a plain disclosure line in the caption ("I partner with ${product}" style). The post must stand on its own without the product.` : "Do not mention any brand or product."}
 
-${SHAPE}`;
+${SHAPES[format] || SHAPE}`;
 }
 function cleanPost(r) {
   const s = Array.isArray(r?.slides) ? r.slides.filter(x => x && (x.h || x.b)).map(x => ({ h: String(x.h || ""), b: String(x.b || "") })) : [];
@@ -613,7 +735,7 @@ function sampleError(e) {
 }
 
 /* ---------- Generate view ---------- */
-let genState = { pillar: 3, angle: "", product: "", date: "", result: null, busy: false, stream: "", error: "" };
+let genState = { pillar: 3, format: "carousel", angle: "", product: "", model: "", date: "", result: null, busy: false, stream: "", error: "" };
 let genAbort = null;
 function renderGenerate() {
   const el = $("#v-generate");
@@ -632,7 +754,9 @@ function renderGenerate() {
         <div><p class="eyebrow" style="margin:0 0 6px">Or start from a sub-topic</p><div class="angles">${p.subs.map(a => `<button data-angle="${esc(a)}">${esc(a)}</button>`).join("")}</div></div>
         <label class="f" for="g-angle">Angle, story, or rough thought
           <textarea id="g-angle" rows="4" placeholder="e.g. I stopped scrolling in bed and started reading Psalms before sleep. What changed in two weeks.">${esc(genState.angle)}</textarea></label>
-        <div class="grid3" style="grid-template-columns:minmax(0,1.4fr) minmax(0,1fr)">
+        ${genState.model ? `<p class="note">Modeling the structure of a post from your swipe file. <button class="btn small ghost" id="g-unmodel">Clear</button></p>` : ""}
+        <div class="grid3" style="grid-template-columns:minmax(0,1fr) minmax(0,1.3fr) minmax(0,1fr)">
+          <label class="f" for="g-format">Format<select id="g-format">${Object.entries(FORMATS).map(([k, l]) => `<option value="${k}"${k === genState.format ? " selected" : ""}>${l}</option>`).join("")}</select></label>
           <label class="f" for="g-product">Product tie-in (optional)
             <select id="g-product"><option value="">None</option>${PRODUCTS.map(x => `<option${x === genState.product ? " selected" : ""}>${esc(x)}</option>`).join("")}</select></label>
           <label class="f" for="g-date">Schedule for<input type="date" id="g-date" value="${esc(genState.date)}"></label>
@@ -651,7 +775,7 @@ function renderGenerate() {
             <p class="eyebrow" style="margin-top:16px">Caption</p><p class="serif" style="white-space:pre-wrap;margin:0">${esc(r.caption)}</p>
             <p class="eyebrow" style="margin-top:16px">Video script</p><p style="white-space:pre-wrap;margin:0;font-size:14px">${esc(r.script)}</p>
             <p class="eyebrow" style="margin-top:16px">X post</p><p style="margin:0">${esc(r.xpost)}</p>
-            <div class="row" style="margin-top:18px"><button class="btn primary" id="g-add">Add to ${esc(fmtDay(genState.date))}</button><span class="note">Check Scripture references and any health claim before posting.</span></div>`
+            <div class="row" style="margin-top:18px"><button class="btn primary" id="g-add">Add to ${esc(fmtDay(genState.date))}</button><button class="btn" id="g-bank">Add to bank, unscheduled</button><span class="note">Check Scripture references and any health claim before posting.</span></div>`
         : `<div class="empty" style="padding:24px 8px"><h2>Pick an angle</h2><p>Claude writes the carousel, caption, a 30–45s video script, and an X post in your voice. You review, tweak, and add it to the calendar.</p></div>`}
       </div>
     </div>`;
@@ -661,16 +785,18 @@ $("#v-generate").addEventListener("click", async e => {
   if (a) { genState.angle = a.dataset.angle; $("#g-angle").value = genState.angle; return; }
   if (e.target.id === "g-stop") { genAbort?.abort(); return; }
   if (e.target.id === "g-go") return runGenerate();
-  if (e.target.id === "g-add") {
-    const id = uid();
-    await store.save({ ...blankPost(), ...genState.result, ai: aiSnapshot(genState.result), id, pillar: genState.pillar, date: genState.date, status: "drafted" });
-    genState = { ...genState, result: null, angle: "", date: "" };
-    selectedId = id; toast("Added to the calendar"); go("studio");
+  if (e.target.id === "g-unmodel") { genState.model = ""; renderGenerate(); return; }
+  if (e.target.id === "g-add" || e.target.id === "g-bank") {
+    const id = uid(), toBank = e.target.id === "g-bank";
+    await store.save({ ...blankPost(), ...genState.result, ai: aiSnapshot(genState.result), id, pillar: genState.pillar, format: genState.format, date: toBank ? "" : genState.date, status: "drafted" });
+    genState = { ...genState, result: null, angle: "", date: "", model: "" };
+    selectedId = id; toast(toBank ? "Added to your bank" : "Added to the calendar"); go("studio");
   }
 });
 $("#v-generate").addEventListener("change", e => {
   if (e.target.id === "g-pillar") { genState.pillar = Number(e.target.value); genState.angle = $("#g-angle").value; renderGenerate(); }
   if (e.target.id === "g-product") genState.product = e.target.value;
+  if (e.target.id === "g-format") genState.format = e.target.value;
   if (e.target.id === "g-date") genState.date = e.target.value;
 });
 $("#v-generate").addEventListener("input", e => { if (e.target.id === "g-angle") genState.angle = e.target.value; });
@@ -681,7 +807,7 @@ async function runGenerate() {
     const r = await sampleFn.json(postPrompt(genState), { signal: genAbort.signal, modelTier: "complex", cache: false,
       onText: ({ text }) => { genState.stream = text; const s = $("#g-stream"); if (s) { s.textContent = text; s.scrollTop = s.scrollHeight; } } });
     genState.result = cleanPost(r);
-    if (!genState.result.slides.length) throw { message: "Claude returned no slides. Try again." };
+    if (!genState.result.slides.length && genState.format !== "text") throw { message: "Claude returned no slides. Try again." };
   } catch (e) { if (e?.code !== "aborted" && e?.name !== "AbortError") genState.error = sampleError(e); }
   genState.busy = false; renderGenerate();
 }
@@ -738,6 +864,7 @@ function renderStudio() {
         <div class="panel fields">
           <label class="f" for="e-title">Working title<input type="text" id="e-title" value="${esc(draft.title)}"></label>
           <div class="grid4">
+            <label class="f" for="e-format">Format<select id="e-format">${Object.entries(FORMATS).map(([k, l]) => `<option value="${k}"${k === (draft.format || "carousel") ? " selected" : ""}>${l}</option>`).join("")}</select></label>
             <label class="f" for="e-pillar">Pillar<select id="e-pillar">${PILLARS.map(x => `<option value="${x.n}"${x.n === draft.pillar ? " selected" : ""}>${esc(x.short)}</option>`).join("")}</select></label>
             <label class="f" for="e-date">Date<input type="date" id="e-date" value="${esc(draft.date)}"></label>
             <label class="f" for="e-time">Post at<input type="time" id="e-time" value="${esc(draft.time || "")}"></label>
@@ -748,7 +875,7 @@ function renderStudio() {
           <div id="e-delconfirm" hidden class="note">Delete “${esc(draft.title || "this post")}” for good? <button class="btn small danger" id="e-delyes">Delete</button> <button class="btn small ghost" id="e-delno">Keep</button></div>
         </div>
         <div class="panel">
-          <div class="row" style="justify-content:space-between;margin-bottom:6px"><h3 style="font-size:22px">Carousel slides</h3>
+          <div class="row" style="justify-content:space-between;margin-bottom:6px"><h3 style="font-size:22px">${{ carousel: "Carousel slides", quote: "Statement", reel: "Reel cover", text: "Text post (no images)" }[draft.format || "carousel"]}</h3>
             <button class="btn small" id="e-hooks" ${sampleFn ? "" : "disabled"}>Hook ideas</button></div>
           <div class="hooks" id="e-hooklist" hidden></div>
           <div id="e-slides"></div>
@@ -774,6 +901,7 @@ function renderStudio() {
           <div class="row" style="font-size:13px"><span class="muted">Slide 1 photo:</span>
             <label class="btn small" for="e-cover" style="cursor:pointer">${draft.cover ? "Replace photo" : "Add your photo"}</label>
             <input type="file" id="e-cover" accept="image/jpeg,image/png,image/webp" hidden>
+            <input type="file" id="e-slidephoto" accept="image/jpeg,image/png,image/webp" hidden>
             ${draft.cover ? `<button class="btn small ghost" id="e-uncover">Remove photo</button>` : `<span class="muted">Sunrise, a meal, a trail. Your real life beats any gradient.</span>`}</div>
           <div class="row"><button class="btn primary" id="e-zip">Download all slides (.zip)</button><span class="muted" style="font-size:13px">Or save slides one at a time below each preview.</span></div>
         </div>
@@ -814,7 +942,7 @@ function renderSlideEditors() {
       <span class="num">${pad(i + 1)}</span>
       <div class="stack"><input type="text" data-sh="${i}" value="${esc(s.h)}" aria-label="Slide ${i + 1} headline" placeholder="${i === 0 ? "Hook" : i === n - 1 ? "Call to action" : "Point headline"}">
         <textarea data-sb="${i}" rows="2" aria-label="Slide ${i + 1} body" placeholder="Body">${esc(s.b)}</textarea></div>
-      <div class="ops"><button data-mv="${i},-1" aria-label="Move up" ${i === 0 ? "disabled" : ""}>↑</button><button data-mv="${i},1" aria-label="Move down" ${i === n - 1 ? "disabled" : ""}>↓</button><button data-rm="${i}" aria-label="Remove slide">✕</button></div>
+      <div class="ops"><button data-sphoto="${i}" aria-label="${s.photo ? "Remove photo from" : "Add a photo to"} slide ${i + 1}" title="${s.photo ? "Remove photo" : "Photo behind this slide"}" style="${s.photo ? "border-color:var(--sun);color:var(--sun)" : ""}">${s.photo ? "◼" : "▢"}</button><button data-mv="${i},-1" aria-label="Move up" ${i === 0 ? "disabled" : ""}>↑</button><button data-mv="${i},1" aria-label="Move down" ${i === n - 1 ? "disabled" : ""}>↓</button><button data-rm="${i}" aria-label="Remove slide">✕</button></div>
     </div>`).join("");
 }
 function updateCounts() {
@@ -851,6 +979,8 @@ studio.addEventListener("change", async e => {
   if (t.id === "s-pick") { await flush(); selectedId = t.value; renderStudio(); return; }
   if (!draft) return;
   if (t.id === "e-pillar") { draft.pillar = Number(t.value); queuePreview(); }
+  else if (t.id === "e-format") { draft.format = t.value; queueSave(); renderStudio(); return; }
+  else if (t.id === "e-slidephoto") { uploadSlidePhoto(t.files?.[0], Number(t.dataset.idx)); t.value = ""; return; }
   else if (t.id === "e-date") draft.date = t.value;
   else if (t.id === "e-time") draft.time = t.value;
   else if (t.id === "e-cover") { uploadCover(t.files?.[0]); t.value = ""; return; }
@@ -876,6 +1006,11 @@ studio.addEventListener("click", async e => {
     draft.theme = t.dataset.themePick; studio.querySelectorAll("[data-theme-pick]").forEach(b => b.setAttribute("aria-pressed", b === t));
     $("#e-themename").textContent = THEMES[themeKey(draft)].label + (draft.theme ? "" : " · auto"); drawPreviews(); queueSave();
   }
+  else if (t.dataset.sphoto !== undefined) {
+    const i = Number(t.dataset.sphoto);
+    if (draft.slides[i]?.photo) { delete draft.slides[i].photo; renderSlideEditors(); drawPreviews(); queueSave(); }
+    else { const f = $("#e-slidephoto"); f.dataset.idx = i; f.click(); }
+  }
   else if (t.id === "e-uncover") { delete draft.cover; delete draft.coverId; renderStudio(); queueSave(); }
   else if (t.id === "e-film") openPrompter(draft.script);
   else if (t.dataset.copy) { const k = t.dataset.copy; copy(k === "caption" && draft.hashtags.length ? draft.caption + "\n\n" + draft.hashtags.map(h => "#" + h).join(" ") : draft[k], "Copied " + k); }
@@ -889,6 +1024,16 @@ studio.addEventListener("click", async e => {
   else if (t.id === "e-hooks") hookIdeas(t);
   else if (t.dataset.hook !== undefined) { const h = t.dataset.hook; draft.hook = h; if (draft.slides[0]) draft.slides[0].h = h; else draft.slides.push({ h, b: "" }); $("#e-hooklist").hidden = true; renderSlideEditors(); drawPreviews(); queueSave(); }
 });
+async function uploadSlidePhoto(file, i) {
+  if (!file || !draft.slides[i]) return;
+  if (!assets) { toast("Photo upload needs this page open on claude.ai"); return; }
+  const id = draft.id; toast("Uploading photo…");
+  try {
+    const a = await assets.upload(file);
+    if (draft?.id !== id || !draft.slides[i]) return;
+    draft.slides[i].photo = a.url; await store.save(structuredClone(draft)); renderSlideEditors(); drawPreviews(); toast(`Photo added to slide ${i + 1}`);
+  } catch (e) { toast(e?.message || "Photo upload failed. Try a smaller JPG or PNG."); }
+}
 async function uploadCover(file) {
   if (!file) return;
   if (!assets) { toast("Photo upload needs this page open on claude.ai"); return; }
@@ -903,8 +1048,8 @@ async function draftWithClaude(btn) {
   btn.disabled = true; btn.textContent = "Drafting…";
   const id = draft.id;
   try {
-    const r = cleanPost(await sampleFn.json(postPrompt({ pillar: draft.pillar, title: draft.title, hook: draft.hook }), { modelTier: "complex", cache: false }));
-    if (!r.slides.length) throw { message: "Claude returned no slides. Try again." };
+    const r = cleanPost(await sampleFn.json(postPrompt({ pillar: draft.pillar, title: draft.title, hook: draft.hook, format: draft.format || "carousel" }), { modelTier: "complex", cache: false }));
+    if (!r.slides.length && draft.format !== "text") throw { message: "Claude returned no slides. Try again." };
     if (draft?.id !== id) return;
     Object.assign(draft, r, { ai: aiSnapshot(r), status: draft.status === "idea" ? "drafted" : draft.status });
     await store.save(structuredClone(draft)); renderStudio(); toast("Drafted. Review before posting.");
@@ -930,7 +1075,7 @@ Reply with only a JSON array of 6 strings.`, { modelTier: "default", cache: fals
 const W = 1080, H = 1350, M = 96;
 let fontsReady = null;
 function loadFonts() {
-  return fontsReady ||= Promise.all(['800 100px "Barlow Condensed"', '700 100px "Barlow Condensed"', '600 30px "Barlow"', '700 30px "Barlow"', '400 44px "Newsreader"', 'italic 400 44px "Newsreader"']
+  return fontsReady ||= Promise.all(['800 100px "Barlow Condensed"', '700 100px "Barlow Condensed"', '600 30px "Barlow"', '700 30px "Barlow"', '400 44px "Newsreader"', '500 44px "Newsreader"', 'italic 400 44px "Newsreader"']
     .map(f => document.fonts.load(f).catch(() => null)));
 }
 function lines(ctx, text, maxW) {
@@ -966,6 +1111,7 @@ function grain(ctx, alpha) {
 function paintBackground(ctx, T, i) {
   const g = ctx.createLinearGradient(0, 0, 0, H); T.stops.forEach(([o, c]) => g.addColorStop(o, c));
   ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+  if (!T.sun.r) { grain(ctx, 0.1); return; }
   const k = i === 0 ? 1 : 0.72, cx = T.sun.x * W, cy = T.sun.y * H, R = T.sun.r * k;
   const glow = ctx.createRadialGradient(cx, cy, R * 0.85, cx, cy, R * 4.4);
   glow.addColorStop(0, hexA(T.sun.c, 0.5 * k)); glow.addColorStop(0.4, hexA(T.sun.c, 0.14 * k)); glow.addColorStop(1, hexA(T.sun.c, 0));
@@ -974,30 +1120,36 @@ function paintBackground(ctx, T, i) {
   grain(ctx, 0.08);
 }
 const imgCache = {};
+const postPhotos = post => [post.cover, ...(post.slides || []).map(x => x.photo)].filter(Boolean);
+const preload = post => Promise.all([loadFonts(), ...postPhotos(post).map(loadImage)]);
 function loadImage(url) {
   if (!url) return Promise.resolve(null);
   if (url in imgCache) return Promise.resolve(imgCache[url]);
   return new Promise(res => { const im = new Image(); im.crossOrigin = "anonymous"; im.onload = () => res(imgCache[url] = im); im.onerror = () => res(imgCache[url] = null); im.src = url; });
 }
-function paintPhoto(ctx, im) {
+function paintPhoto(ctx, im, strong) {
   const sc = Math.max(W / im.width, H / im.height), w = im.width * sc, h = im.height * sc;
   ctx.drawImage(im, (W - w) / 2, (H - h) / 2, w, h);
   const g = ctx.createLinearGradient(0, 0, 0, H);
-  g.addColorStop(0, "rgba(20,12,8,.25)"); g.addColorStop(0.35, "rgba(20,12,8,.05)"); g.addColorStop(0.62, "rgba(20,12,8,.5)"); g.addColorStop(1, "rgba(20,12,8,.88)");
+  // Slide 1 keeps the photo bright up top; text-heavy slides get an even scrim so every line reads.
+  if (strong) { g.addColorStop(0, "rgba(20,12,8,.6)"); g.addColorStop(1, "rgba(20,12,8,.78)"); }
+  else { g.addColorStop(0, "rgba(20,12,8,.25)"); g.addColorStop(0.35, "rgba(20,12,8,.05)"); g.addColorStop(0.62, "rgba(20,12,8,.5)"); g.addColorStop(1, "rgba(20,12,8,.88)"); }
   ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
   grain(ctx, 0.06);
 }
 function drawSlide(cv, post, i) {
   const ctx = cv.getContext("2d");
-  const photo = i === 0 && post.cover ? imgCache[post.cover] : null;
-  const base = THEMES[themeKey(post)];
-  const T = photo ? { ...base, fg: "#FFF6EA", soft: "rgba(255,246,234,.85)", foot: null } : base;
   const slides = post.slides, n = slides.length, s = slides[i] || { h: "", b: "" };
-  const display = sz => `800 ${sz}px "Barlow Condensed", "Arial Narrow", sans-serif`;
+  const photoUrl = s.photo || (i === 0 ? post.cover : null), photo = photoUrl ? imgCache[photoUrl] : null;
+  const base = THEMES[themeKey(post)];
+  const T = photo ? { ...base, fg: "#FFF6EA", soft: "rgba(255,246,234,.85)", accent: base.serif ? "#E9C08A" : base.accent, foot: null } : base;
+  const sf = !!base.serif, up = t => sf ? t : t.toUpperCase(), lhD = sf ? 1.08 : 0.94;
+  const display = sz => sf ? `500 ${sz}px "Newsreader", Georgia, serif` : `800 ${sz}px "Barlow Condensed", "Arial Narrow", sans-serif`;
+  const bold = sz => sf ? `500 ${sz}px "Newsreader", Georgia, serif` : `700 ${sz}px "Barlow Condensed", "Arial Narrow", sans-serif`;
   const serif = (sz, it) => `${it ? "italic " : ""}400 ${sz}px "Newsreader", Georgia, serif`;
   const ui = sz => `700 ${sz}px "Barlow", system-ui, sans-serif`;
   ctx.textBaseline = "alphabetic"; spaced(ctx, 0);
-  if (photo) paintPhoto(ctx, photo); else paintBackground(ctx, T, i);
+  if (photo) paintPhoto(ctx, photo, i > 0 || post.format === "quote"); else paintBackground(ctx, T, i);
   const maxW = W - M * 2;
   const footer = right => {
     ctx.font = ui(28); spaced(ctx, 1.5); ctx.fillStyle = T.foot || T.soft;
@@ -1005,36 +1157,49 @@ function drawSlide(cv, post, i) {
     ctx.textAlign = "right"; ctx.fillText(right, W - M, H - 78); ctx.textAlign = "left"; spaced(ctx, 0);
     ctx.fillStyle = T.foot || T.accent; ctx.fillRect(M, H - 130, 64, 4);
   };
+  if (post.format === "quote") {
+    // Mindset statement: one thought, set like a page from a journal.
+    const q = fit(ctx, s.h || post.hook || "", sz => `500 ${sz}px "Newsreader", Georgia, serif`, maxW, 720, 100, 50, 1.18);
+    const attr = s.b ? s.b.toUpperCase() : "";
+    const blockH = 130 + q.ls.length * q.s * 1.18 + (attr ? 90 : 0);
+    let y = Math.max(200, (H - 150 - blockH) / 2 + 30);
+    ctx.font = `500 230px "Newsreader", Georgia, serif`; ctx.fillStyle = T.accent; ctx.fillText("“", M - 8, y + 150); y += 160;
+    ctx.font = `500 ${q.s}px "Newsreader", Georgia, serif`; ctx.fillStyle = T.fg;
+    q.ls.forEach(l => { y += q.s * 1.18; ctx.fillText(l, M, y - q.s * 0.25); });
+    if (attr) { y += 70; ctx.font = ui(28); spaced(ctx, 4); ctx.fillStyle = T.accent; ctx.fillText(attr.slice(0, 48), M, y); spaced(ctx, 0); }
+    footer(n > 1 ? `${i + 1} / ${n}` : "");
+    return;
+  }
   if (i === 0) {
     ctx.font = ui(28); spaced(ctx, 5); ctx.fillStyle = T.accent;
     ctx.fillText((P[post.pillar]?.short || "").toUpperCase(), M, 186); spaced(ctx, 0);
-    const head = fit(ctx, (s.h || post.hook || "").toUpperCase(), display, maxW, 640, 168, 80, 0.94);
+    const head = fit(ctx, up(s.h || post.hook || ""), display, maxW, 640, sf ? 132 : 168, sf ? 64 : 80, lhD);
     const sub = s.b ? fit(ctx, s.b, sz => serif(sz, true), maxW, 220, 50, 34, 1.3) : { s: 0, ls: [] };
-    const blockH = head.ls.length * head.s * 0.94 + (sub.ls.length ? 44 + sub.ls.length * sub.s * 1.3 : 0);
+    const blockH = head.ls.length * head.s * lhD + (sub.ls.length ? 44 + sub.ls.length * sub.s * 1.3 : 0);
     // With a photo, text sits low so the image reads first.
     let y = (photo ? Math.max(330, H - 190 - blockH) : Math.max(330, (H - 170 - blockH) / 2 + 120)) + head.s * 0.8;
     ctx.font = display(head.s); ctx.fillStyle = T.fg;
-    head.ls.forEach(l => { ctx.fillText(l, M, y); y += head.s * 0.94; });
-    if (sub.ls.length) { y += 44 - head.s * 0.94 + sub.s * 1.1; ctx.font = serif(sub.s, true); ctx.fillStyle = T.soft; sub.ls.forEach(l => { ctx.fillText(l, M, y); y += sub.s * 1.3; }); }
-    footer("SWIPE  →");
+    head.ls.forEach(l => { ctx.fillText(l, M, y); y += head.s * lhD; });
+    if (sub.ls.length) { y += 44 - head.s * lhD + sub.s * 1.1; ctx.font = serif(sub.s, true); ctx.fillStyle = T.soft; sub.ls.forEach(l => { ctx.fillText(l, M, y); y += sub.s * 1.3; }); }
+    footer(n > 1 ? "SWIPE  →" : "");
     return;
   }
   const last = i === n - 1 && n > 2;
   // Measure first so short slides sit in the optical center instead of hugging the top.
-  const headFont = sz => (last ? display(sz) : `700 ${sz}px "Barlow Condensed", "Arial Narrow", sans-serif`);
-  const mHead = fit(ctx, (s.h || "").toUpperCase(), headFont, maxW, last ? 420 : 330, last ? 130 : 100, 56, 0.98);
+  const headFont = sz => (last ? display(sz) : bold(sz));
+  const mHead = fit(ctx, up(s.h || ""), headFont, maxW, last ? 420 : 330, last ? 130 : 100, 56, 0.98);
   const topH = last ? 90 : 175;
   const roomEst = H - 170 - (150 + topH + mHead.ls.length * mHead.s * 0.98 + 34);
   const mBody = s.b && roomEst > 60 ? fit(ctx, s.b, sz => serif(sz, last), maxW, roomEst, 48, 30, 1.38) : null;
   const total = topH + mHead.ls.length * mHead.s * 0.98 + (mBody ? 34 + mBody.ls.length * mBody.s * 1.38 : 0);
   let y = Math.max(150, Math.round((H - 170 - 150 - total) * 0.42) + 150);
   if (!last) {
-    ctx.font = display(150); ctx.fillStyle = T.accent; ctx.fillText(pad(i), M - 6, y + 105); y += 175;
+    ctx.font = sf ? `italic 400 140px "Newsreader", Georgia, serif` : display(150); ctx.fillStyle = T.accent; ctx.fillText(pad(i), M - 6, y + 105); y += 175;
   } else {
     ctx.font = ui(28); spaced(ctx, 5); ctx.fillStyle = T.accent; ctx.fillText("BEFORE YOU GO", M, y + 36); spaced(ctx, 0); y += 90;
   }
-  const head = fit(ctx, (s.h || "").toUpperCase(), sz => (last ? display(sz) : `700 ${sz}px "Barlow Condensed", "Arial Narrow", sans-serif`), maxW, last ? 420 : 330, last ? 130 : 100, 56, 0.98);
-  ctx.font = last ? display(head.s) : `700 ${head.s}px "Barlow Condensed", "Arial Narrow", sans-serif`; ctx.fillStyle = T.fg;
+  const head = fit(ctx, up(s.h || ""), headFont, maxW, last ? 420 : 330, last ? 130 : 100, 56, 0.98);
+  ctx.font = headFont(head.s); ctx.fillStyle = T.fg;
   y += head.s * 0.82; head.ls.forEach(l => { ctx.fillText(l, M, y); y += head.s * 0.98; });
   y += 40 - head.s * 0.68;
   const room = H - 170 - y;
@@ -1047,7 +1212,7 @@ function drawSlide(cv, post, i) {
 }
 async function drawPreviews() {
   const box = $("#e-previews"); if (!box || !draft) return;
-  await Promise.all([loadFonts(), loadImage(draft.cover)]);
+  await preload(draft);
   if (!draft.slides.length) { box.innerHTML = `<p class="muted">Slides appear here as you write them.</p>`; return; }
   box.innerHTML = draft.slides.map((_, i) => `<figure><canvas width="${W}" height="${H}" aria-label="Slide ${i + 1} preview"></canvas><figcaption><span>Slide ${i + 1}</span><button data-save="${i}">Save PNG</button></figcaption></figure>`).join("");
   box.querySelectorAll("canvas").forEach((cv, i) => drawSlide(cv, draft, i));
@@ -1071,7 +1236,7 @@ async function offer(filename, blob) {
   fig.innerHTML = blob.type === "image/png" ? `<img src="${url}" alt="${esc(filename)}"><figcaption>Long-press or right-click to save</figcaption>` : `<figcaption>Download is not available here. Save slides one at a time.</figcaption>`;
   box.prepend(fig); toast("Saving files isn't available here");
 }
-async function saveSlide(i) { await Promise.all([loadFonts(), loadImage(draft.cover)]); offer(`${slug()}-${pad(i + 1)}.png`, await slideBlob(i)); }
+async function saveSlide(i) { await preload(draft); offer(`${slug()}-${pad(i + 1)}.png`, await slideBlob(i)); }
 async function saveVideo(btn) {
   btn.disabled = true; btn.textContent = "Preparing…";
   try { const blob = await (await fetch(draft.video.url)).blob(); await offer(`${slug()}.mp4`, blob); }
@@ -1083,7 +1248,7 @@ async function exportZip(btn) {
   if (!window.JSZip) { toast("Zip export didn't load. Save slides one at a time."); return; }
   btn.disabled = true; btn.textContent = "Packing…";
   try {
-    await Promise.all([loadFonts(), loadImage(draft.cover)]);
+    await preload(draft);
     const zip = new JSZip();
     for (let i = 0; i < draft.slides.length; i++) zip.file(`${slug()}-${pad(i + 1)}.png`, await slideBlob(i));
     const caption = draft.caption + (draft.hashtags.length ? "\n\n" + draft.hashtags.map(h => "#" + h).join(" ") : "");
@@ -1097,8 +1262,8 @@ const pr = { speed: 3, size: 40, playing: false, last: 0, raf: 0, lock: null, co
 try { Object.assign(pr, JSON.parse(localStorage.getItem("lie-prompter") || "{}"), { playing: false }); } catch {}
 function scriptHtml(text) {
   return String(text || "").split("\n").map(l => l.trim()).filter(Boolean).map(l => {
-    const cue = l.match(/^\[\s*on screen:?\s*(.*?)\]$/i);
-    if (cue) return `<p class="cue">On screen · ${esc(cue[1])}</p>`;
+    const cue = l.match(/^\[\s*(on screen|b-roll):?\s*(.*?)\]$/i);
+    if (cue) return `<p class="cue">${/b-roll/i.test(cue[1]) ? "B-roll" : "On screen"} · ${esc(cue[2])}</p>`;
     const lab = l.match(/^(HOOK|CTA)\s*(\([^)]*\))?\s*:\s*(.*)$/i);
     if (lab) return `<p><span class="lbl">${esc(lab[1])}</span>${esc(lab[3])}</p>`;
     return `<p>${esc(l)}</p>`;
@@ -1167,6 +1332,7 @@ function renderPlaybook() {
       <label class="f" for="set-niche">Niche statement<textarea id="set-niche" rows="2">${esc(settings.niche)}</textarea></label>
       <div class="grid3">
         <label class="f" for="set-handle">Handle on slides<input type="text" id="set-handle" value="${esc(settings.handle)}"></label>
+        <label class="f" for="set-runway">Ready runway target<input type="number" min="3" max="60" id="set-runway" value="${runwayTarget()}"></label>
         <label class="f" for="set-brand">Brand name<input type="text" id="set-brand" value="${esc(settings.brandName || "")}" placeholder="Center of your content tree"></label>
         <label class="f" for="set-start">Sprint starts<input type="date" id="set-start" value="${esc(settings.sprintStart)}"></label>
         <label class="f" for="set-theme">Default slide theme<select id="set-theme"><option value="auto"${THEMES[settings.theme] ? "" : " selected"}>Auto by pillar</option>${Object.entries(THEMES).map(([k, t]) => `<option value="${k}"${k === settings.theme ? " selected" : ""}>${t.label}</option>`).join("")}</select></label>
@@ -1262,8 +1428,396 @@ $("#v-playbook").addEventListener("click", async e => {
   }
   if (id === "voice-reject") { $("#voice-proposal").hidden = true; return; }
   if (e.target.id !== "set-save") return;
-  settings = { ...settings, niche: $("#set-niche").value.trim() || DEFAULT_SETTINGS.niche, handle: $("#set-handle").value.trim(), brandName: $("#set-brand").value.trim(), sprintStart: $("#set-start").value || settings.sprintStart, theme: $("#set-theme").value };
+  settings = { ...settings, niche: $("#set-niche").value.trim() || DEFAULT_SETTINGS.niche, handle: $("#set-handle").value.trim(), brandName: $("#set-brand").value.trim(), runwayTarget: Number($("#set-runway").value) || 10, sprintStart: $("#set-start").value || settings.sprintStart, theme: $("#set-theme").value };
   try { await store.saveSettings(); toast("Settings saved"); } catch { toast("Couldn't save settings. You may have view-only access."); }
+});
+
+/* ---------- Content bank ---------- */
+const BANK_COLS = [["idea", "Ideas"], ["drafted", "Drafts"], ["ready", "Ready"], ["posted", "Posted"]];
+let bankFormat = "all", bankPillar = 0, bankSel = new Set(), bankBusy = null, bankAbort = null;
+const runwayTarget = () => Number(settings.runwayTarget) || 10;
+function missing(p) {
+  const f = p.format || "carousel", n = p.slides?.length || 0, out = [];
+  if (!p.hook && !p.slides?.[0]?.h) out.push("hook");
+  if (f === "carousel" && n < 3) out.push("slides");
+  if ((f === "quote" || f === "reel") && !n) out.push(f === "quote" ? "statement" : "cover");
+  if (f !== "text" && !p.caption) out.push("caption");
+  if (f === "reel" && !p.script) out.push("script");
+  if (f === "text" && !p.caption && !p.xpost) out.push("text");
+  return out;
+}
+const readyPosts = () => posts.filter(p => p.status === "ready");
+function bankFilter(p) { return (bankFormat === "all" || (p.format || "carousel") === bankFormat) && (!bankPillar || p.pillar === bankPillar); }
+function renderBank() {
+  const el = $("#v-bank");
+  if (storeMode === "loading") { el.innerHTML = `<div class="empty"><h2>Loading your bank</h2></div>`; return; }
+  const ready = readyPosts(), target = runwayTarget(), low = ready.length < Math.ceil(target / 2);
+  const byFmt = Object.keys(FORMATS).map(k => [k, ready.filter(p => (p.format || "carousel") === k).length]);
+  const ideas = posts.filter(p => p.status === "idea"), selIdeas = [...bankSel].filter(id => posts.find(p => p.id === id && p.status === "idea"));
+  el.innerHTML = `
+    <div class="row" style="justify-content:space-between;align-items:end">
+      <div><p class="eyebrow">Always something ready to post</p><h2 style="font-size:clamp(30px,5vw,46px)">Content bank</h2></div>
+      <div class="row">
+        <button class="btn" id="b-new">+ Idea</button>
+        <button class="btn sun" id="b-plan" ${sampleFn ? "" : "disabled"}>Plan 10 ideas</button>
+        <button class="btn primary" id="b-draft" ${sampleFn && (selIdeas.length || ideas.length) ? "" : "disabled"}>${selIdeas.length ? `Draft ${selIdeas.length} selected` : `Draft all ${ideas.length} ideas`}</button>
+      </div>
+    </div>
+    ${bankBusy ? `<div class="busybar" role="status"><span>${esc(bankBusy)}</span><button class="btn small ghost" id="b-stop">Stop</button></div>` : ""}
+    <div class="panel runway${low ? " low" : ""}">
+      <div class="big">${ready.length}<small>READY</small></div>
+      <div>
+        <b>${ready.length >= target ? `You're ${ready.length - target ? `${ready.length - target} ahead of` : "at"} your ${target}-post runway.` : `${target - ready.length} more to reach your ${target}-post runway.`}</b>
+        <span class="muted"> ${ready.length} days of posting banked at one a day. ${byFmt.filter(([, n]) => n).map(([k, n]) => `${n} ${FORMATS[k].toLowerCase()}${n > 1 ? "s" : ""}`).join(" · ") || "Nothing ready yet."}</span>
+        <div class="meter"><i style="width:${Math.min(100, ready.length / target * 100)}%"></i></div>
+      </div>
+    </div>
+    <div class="row" style="justify-content:space-between">
+      <div class="chips" role="group" aria-label="Format filter">${[["all", "All"], ...Object.entries(FORMATS)].map(([k, l]) => `<button data-bfmt="${k}" aria-pressed="${bankFormat === k}">${l}</button>`).join("")}</div>
+      <label class="f" for="b-pillar" style="flex-direction:row;align-items:center;gap:8px;display:flex">Pillar
+        <select id="b-pillar" style="width:auto"><option value="0">All pillars</option>${PILLARS.map(p => `<option value="${p.n}"${bankPillar === p.n ? " selected" : ""}>${esc(p.short)}</option>`).join("")}</select></label>
+    </div>
+    <div class="board">${BANK_COLS.map(([st, label]) => {
+      let list = posts.filter(p => p.status === st && bankFilter(p));
+      list.sort(st === "posted" ? (a, b) => (b.date || "").localeCompare(a.date || "") : (a, b) => (a.date || "9999").localeCompare(b.date || "9999") || (b.updated || "").localeCompare(a.updated || ""));
+      const more = st === "posted" && list.length > 8 ? list.length - 8 : 0; if (more) list = list.slice(0, 8);
+      return `<section class="col" data-col="${st}" aria-label="${label}">
+        <div class="col-h"><h3>${label}</h3><span class="n">${posts.filter(p => p.status === st && bankFilter(p)).length}</span></div>
+        ${list.map(bankCard).join("") || `<p class="muted" style="margin:4px;font-size:13px">${{ idea: "Ideas land here. Plan 10 or add your own.", drafted: "Drafts land here. Finish them in Studio.", ready: "Nothing ready yet. Polish a draft and move it here.", posted: "Posted work shows here." }[st]}</p>`}
+        ${more ? `<p class="muted" style="margin:4px;font-size:12px">+${more} older</p>` : ""}
+      </section>`;
+    }).join("")}</div>`;
+  drawThumbs();
+}
+function bankCard(p) {
+  const f = p.format || "carousel", need = p.status === "drafted" ? missing(p) : [];
+  const hasSlides = (p.slides?.length || 0) > 0;
+  const acts = {
+    idea: `<label style="display:inline-flex;gap:5px;align-items:center;font-size:12.5px"><input type="checkbox" data-bsel="${p.id}"${bankSel.has(p.id) ? " checked" : ""}> Select</label><button class="btn" data-bdraft="${p.id}" ${sampleFn ? "" : "disabled"}>Draft it</button>`,
+    drafted: `<button class="btn" data-bopen="${p.id}">Finish</button>${need.length ? "" : `<button class="btn primary" data-bmove="${p.id}:ready">Mark ready</button>`}`,
+    ready: `<button class="btn" data-bopen="${p.id}">Open</button>${p.date ? "" : `<button class="btn" data-bsched="${p.id}">Schedule</button>`}<button class="btn primary" data-bmove="${p.id}:posted">Posted</button>`,
+    posted: `<button class="btn" data-bopen="${p.id}">Results</button>`,
+  }[p.status] || "";
+  return `<article class="bcard${bankSel.has(p.id) ? " sel" : ""}" draggable="true" data-card="${p.id}">
+    ${hasSlides ? `<canvas class="thumb" width="216" height="270" data-thumb="${p.id}" aria-hidden="true"></canvas>` : `<div class="thumb ph" style="border-left:3px solid ${pColor(p.pillar)}">${esc(FORMATS[f])}</div>`}
+    <div style="min-width:0">
+      <div class="meta"><span class="fmt">${esc(FORMATS[f])}</span><span style="display:inline-flex;gap:4px;align-items:center"><i class="dot" style="background:${pColor(p.pillar)}"></i>${esc(P[p.pillar]?.short || "")}</span></div>
+      <h4>${esc(p.title || p.hook || "Untitled")}</h4>
+      ${p.hook && p.hook !== p.title ? `<p class="hk">${esc(p.hook)}</p>` : ""}
+      ${need.length ? `<p class="need">Needs ${need.join(", ")}</p>` : ""}
+    </div>
+    <div class="acts">${acts}${p.date ? `<span class="when">${esc(fmtDay(p.date))}</span>` : ""}</div>
+  </article>`;
+}
+async function drawThumbs() {
+  const cvs = [...document.querySelectorAll("#v-bank canvas[data-thumb]")]; if (!cvs.length) return;
+  await loadFonts();
+  for (const cv of cvs) {
+    const p = posts.find(x => x.id === cv.dataset.thumb); if (!p || !cv.isConnected) continue;
+    await Promise.all(postPhotos(p).slice(0, 2).map(loadImage));
+    const ctx = cv.getContext("2d"); ctx.setTransform(216 / W, 0, 0, 270 / H, 0, 0); drawSlide(cv, p, 0);
+  }
+}
+async function setStatus(id, status) {
+  const p = posts.find(x => x.id === id); if (!p || p.status === status) return;
+  if (status === "ready" && missing(p).length) { toast(`Needs ${missing(p).join(", ")} first. Opening it in Studio.`); selectedId = id; draft = null; go("studio"); return; }
+  const next = { ...structuredClone(p), status };
+  if (status === "posted" && !next.date) next.date = TODAY;
+  try { await store.save(next); toast(status === "ready" ? "Banked. Ready to post." : status === "posted" ? "Posted. Log results later in Studio." : "Moved"); }
+  catch { toast("Couldn't save. You may have view-only access."); }
+}
+async function draftPost(p, signal) {
+  const r = cleanPost(await sampleFn.json(postPrompt({ pillar: p.pillar, title: p.title, hook: p.hook, angle: p.angle || "", format: p.format || "carousel" }), { modelTier: "complex", cache: false, signal }));
+  if (!r.slides.length && p.format !== "text") throw { message: "Claude returned no slides." };
+  const cur = posts.find(x => x.id === p.id) || p;
+  await store.save({ ...structuredClone(cur), ...r, ai: aiSnapshot(r), status: "drafted" });
+}
+async function batchDraft(ids) {
+  bankAbort = new AbortController(); let done = 0, failed = 0;
+  for (const id of ids) {
+    if (bankAbort.signal.aborted) break;
+    const p = posts.find(x => x.id === id); if (!p || p.status !== "idea") continue;
+    bankBusy = `Drafting ${done + failed + 1} of ${ids.length}: ${p.title || p.hook}`; renderBank();
+    try { await draftPost(p, bankAbort.signal); done++; bankSel.delete(id); }
+    catch (e) { if (e?.code === "aborted" || e?.name === "AbortError") break; failed++; if (e?.code === "rate_limited" || e?.code === "not_granted") { toast(sampleError(e)); break; } }
+  }
+  bankBusy = null; renderBank(); toast(`${done} drafted${failed ? `, ${failed} failed` : ""}. Finish them in Studio.`);
+}
+async function planIdeas() {
+  const n = 10, total = posts.filter(p => p.status !== "posted").length;
+  const counts = Object.fromEntries(PILLARS.map(p => [p.n, posts.filter(x => x.pillar === p.n && x.status !== "posted").length]));
+  const plan = [];
+  for (let k = 0; k < n; k++) { let best = PILLARS[0], gap = -Infinity; for (const p of PILLARS) { const g = p.target / 100 * (total + k + 1) - counts[p.n]; if (g > gap) { gap = g; best = p; } } counts[best.n]++; plan.push(best.n); }
+  const fmts = ["carousel", "carousel", "quote", "carousel", "reel", "carousel", "quote", "carousel", "text", "reel"];
+  const unused = tree.filter(t => t.kind === "idea" && !t.postId).slice(0, 60);
+  const swipeNotes = swipe.filter(x => x.analysis?.structure).slice(0, 6).map(x => `- ${x.analysis.format}: ${x.analysis.structure}`).join("\n");
+  bankBusy = "Planning 10 ideas from your pillars and content tree…"; renderBank();
+  try {
+    const r = await sampleFn.json(`${brief()}
+
+Plan ${n} post ideas for his content bank. Use these pillar and format slots, in order:
+${plan.map((pl, i) => `${i + 1}. pillar ${pl} (${P[pl].name}), format ${fmts[i]}`).join("\n")}
+
+Ideas from his content tree he hasn't used yet (prefer these when one fits a slot; return its id as treeId):
+${unused.map(t => `${t.id}: ${t.label}${t.note ? ` (${t.note.slice(0, 80)})` : ""}`).join("\n") || "(none)"}
+${swipeNotes ? `\nPost structures he admires (borrow structure, never topics or words):\n${swipeNotes}` : ""}
+Already in the bank (don't repeat): ${posts.slice(-60).map(p => p.title).filter(Boolean).join("; ")}
+
+Formats: carousel = teaching slides; quote = one mindset or faith statement on a single image; reel = video-first; text = X/Threads post.
+Reply with only a JSON array: [{"pillar": 3, "format": "carousel", "title": "max 8 words", "hook": "max 12 words", "angle": "one sentence on what the post says", "treeId": "t012 or empty"}]`, { modelTier: "complex", cache: false });
+    let added = 0;
+    for (const [i, x] of (Array.isArray(r) ? r : []).entries()) {
+      if (!x?.title) continue;
+      const id = uid();
+      await store.save({ ...blankPost(), id, pillar: P[x.pillar] ? Number(x.pillar) : plan[i] || 2, format: FORMATS[x.format] ? x.format : fmts[i] || "carousel", title: String(x.title), hook: String(x.hook || ""), angle: String(x.angle || "") });
+      const t = x.treeId && tree.find(n => n.id === x.treeId);
+      if (t) await store.saveNode({ ...structuredClone(t), postId: id });
+      added++;
+    }
+    toast(`${added} ideas added. Select a few and draft them.`);
+  } catch (e) { toast(sampleError(e)); }
+  bankBusy = null; renderBank();
+}
+const bv = $("#v-bank");
+bv.addEventListener("click", async e => {
+  const b = e.target.closest("button"); if (!b) return;
+  if (b.dataset.bfmt) { bankFormat = b.dataset.bfmt; renderBank(); }
+  else if (b.id === "b-stop") bankAbort?.abort();
+  else if (b.id === "b-plan") planIdeas();
+  else if (b.id === "b-draft") { const ids = [...bankSel].filter(id => posts.find(p => p.id === id && p.status === "idea")); batchDraft(ids.length ? ids : posts.filter(p => p.status === "idea" && bankFilter(p)).map(p => p.id)); }
+  else if (b.id === "b-new") { const id = uid(); await store.save({ ...blankPost(), id, title: "New idea", format: bankFormat !== "all" ? bankFormat : "carousel", pillar: bankPillar || 2 }); selectedId = id; draft = null; go("studio"); }
+  else if (b.dataset.bdraft) { batchDraft([b.dataset.bdraft]); }
+  else if (b.dataset.bopen) { selectedId = b.dataset.bopen; draft = null; go("studio"); }
+  else if (b.dataset.bmove) { const [id, st] = b.dataset.bmove.split(":"); setStatus(id, st); }
+  else if (b.dataset.bsched) { const p = posts.find(x => x.id === b.dataset.bsched); if (p) { const d = nextEmptyDate(); await store.save({ ...structuredClone(p), date: d }); toast(`Scheduled for ${fmtDay(d)}`); } }
+});
+bv.addEventListener("change", e => {
+  if (e.target.dataset.bsel) { e.target.checked ? bankSel.add(e.target.dataset.bsel) : bankSel.delete(e.target.dataset.bsel); renderBank(); }
+  if (e.target.id === "b-pillar") { bankPillar = Number(e.target.value); renderBank(); }
+});
+bv.addEventListener("dragstart", e => { const c = e.target.closest?.("[data-card]"); if (!c) return; e.dataTransfer.setData("text/plain", c.dataset.card); e.dataTransfer.effectAllowed = "move"; c.classList.add("dragging"); });
+bv.addEventListener("dragend", e => e.target.closest?.("[data-card]")?.classList.remove("dragging"));
+bv.addEventListener("dragover", e => { const col = e.target.closest("[data-col]"); if (!col) return; e.preventDefault(); bv.querySelectorAll(".col.drop").forEach(c => c !== col && c.classList.remove("drop")); col.classList.add("drop"); });
+bv.addEventListener("dragleave", e => { const col = e.target.closest("[data-col]"); if (col && !col.contains(e.relatedTarget)) col.classList.remove("drop"); });
+bv.addEventListener("drop", e => { const col = e.target.closest("[data-col]"); if (!col) return; e.preventDefault(); col.classList.remove("drop"); const id = e.dataTransfer.getData("text/plain"); if (id) setStatus(id, col.dataset.col); });
+
+/* ---------- Inspire: journal + swipe file ---------- */
+const PROMPTS = ["What did God show me today?", "Where did I see His faithfulness this week?", "What am I wrestling with?", "Which habit is forming me, for better or worse?", "Scripture I'm sitting with, and why", "What would I tell a younger brother about this?", "What did my body need today, and did I listen?", "Who did I serve today? Who served me?"];
+let inspireTab = "journal", jSel = null, jDraft = null, jTimer = null, jIdeas = null, swipeForm = false, swipeBusy = null, styleNotes = "";
+function onInspireData() {
+  if (view !== "inspire") return;
+  if ($("#v-inspire").contains(document.activeElement) && document.activeElement.matches("textarea, input")) { if (inspireTab === "journal") drawEntries(); return; }
+  renderInspire();
+}
+function renderInspire() {
+  const el = $("#v-inspire");
+  el.innerHTML = `
+    <div class="row" style="justify-content:space-between;align-items:end">
+      <div><p class="eyebrow">Prayer, reflection, and the craft of others</p><h2 style="font-size:clamp(30px,5vw,46px)">Inspire</h2></div>
+      <div class="seg" role="group" aria-label="Section"><button data-itab="journal" aria-pressed="${inspireTab === "journal"}">Journal</button><button data-itab="swipe" aria-pressed="${inspireTab === "swipe"}">Swipe file</button></div>
+    </div>
+    <div id="ins-body"></div>`;
+  inspireTab === "journal" ? renderJournal() : renderSwipe();
+}
+function sortedJournal() { return [...journal].sort((a, b) => (b.date || "").localeCompare(a.date || "") || (b.updated || "").localeCompare(a.updated || "")); }
+function renderJournal() {
+  if (!jDraft) { const latest = sortedJournal()[0]; jDraft = latest && latest.date === TODAY ? structuredClone(latest) : { id: "j" + Date.now().toString(36), date: TODAY, scripture: "", text: "" }; jSel = jDraft.id; }
+  const b = $("#ins-body");
+  b.innerHTML = `<div class="ins">
+    <div class="panel fields">
+      <p class="note" style="margin:0">Private to you. ${storeMode === "db" ? "Saved to your own space on claude.ai; nobody else who opens this page can read it." : "Saved in this browser only."} Claude reads an entry only when you press “Find posts in this.”</p>
+      <div class="angles">${PROMPTS.map(q => `<button data-jprompt="${esc(q)}">${esc(q)}</button>`).join("")}</div>
+      <div class="grid3" style="grid-template-columns:minmax(0,1fr) minmax(0,2fr)">
+        <label class="f" for="j-date">Date<input type="date" id="j-date" value="${esc(jDraft.date)}"></label>
+        <label class="f" for="j-scrip">Scripture<input type="text" id="j-scrip" value="${esc(jDraft.scripture || "")}" placeholder="e.g. Psalm 4:8"></label>
+      </div>
+      <label class="f" for="j-text">Entry<textarea id="j-text" class="journal-text" rows="14" placeholder="Write freely. Pray on the page.">${esc(jDraft.text || "")}</textarea></label>
+      <div class="row" style="justify-content:space-between"><span class="saved" id="j-saved">${journal.some(x => x.id === jDraft.id) ? "Saved" : "Not saved yet"}</span>
+        <span class="row"><button class="btn sun" id="j-mine" ${sampleFn ? "" : "disabled"}>Find posts in this</button><button class="btn ghost small danger" id="j-del">Delete</button></span></div>
+      <div id="j-delconfirm" hidden class="note">Delete this entry for good? <button class="btn small danger" id="j-delyes">Delete</button> <button class="btn small ghost" id="j-delno">Keep</button></div>
+      <div class="idea-out" id="j-ideas">${jIdeasHtml()}</div>
+    </div>
+    <div class="panel fields">
+      <div class="row" style="justify-content:space-between"><h3 style="font-size:22px">Entries</h3><button class="btn small primary" id="j-new">New entry</button></div>
+      <ul class="entries" id="j-list"></ul>
+    </div>
+  </div>`;
+  drawEntries();
+}
+function drawEntries() {
+  const ul = $("#j-list"); if (!ul) return;
+  const list = sortedJournal();
+  ul.innerHTML = list.length ? list.map(x => `<li><button data-jopen="${x.id}" class="${x.id === jSel ? "sel" : ""}"><span class="d">${esc(fmtDay(x.date || TODAY))}${x.scripture ? " · " + esc(x.scripture) : ""}</span><span class="l">${esc((x.text || "").split("\n").find(l => l.trim()) || "Empty entry")}</span></button></li>`).join("")
+    : `<li class="muted" style="padding:8px">Your entries will collect here. Start with one honest paragraph.</li>`;
+}
+function jIdeasHtml() {
+  if (!jIdeas) return "";
+  if (jIdeas === "busy") return `<p class="muted">Reading your entry…</p>`;
+  if (!jIdeas.length) return `<p class="muted">Nothing shareable stood out in this one. That's fine. Not every prayer is content.</p>`;
+  return `<p class="eyebrow" style="margin:6px 0 0">Posts that could serve someone</p>` + jIdeas.map((x, i) => `<article>
+    <span class="meta" style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em">${esc(FORMATS[x.format] || "Carousel")} · ${esc(P[x.pillar]?.short || "")}</span>
+    <b>${esc(x.hook || x.title)}</b><span class="muted" style="font-size:13px">${esc(x.angle || "")}</span>
+    <div class="row">${x.added ? `<span class="saved">In your bank</span>` : `<button class="btn small primary" data-jadd="${i}">Add to bank</button>`}</div></article>`).join("");
+}
+function queueJournalSave() {
+  const s = $("#j-saved"); if (s) s.textContent = "Saving…";
+  clearTimeout(jTimer);
+  jTimer = setTimeout(async () => {
+    try { await store.saveDoc("journal", structuredClone(jDraft)); const s2 = $("#j-saved"); if (s2) s2.textContent = "Saved"; drawEntries(); }
+    catch (e) { const s2 = $("#j-saved"); if (s2) s2.textContent = e?.message || "Not saved. Check your connection."; }
+  }, 700);
+}
+async function mineJournal(btn) {
+  if (!(jDraft.text || "").trim()) { toast("Write something first"); return; }
+  btn.disabled = true; jIdeas = "busy"; $("#j-ideas").innerHTML = jIdeasHtml();
+  try {
+    const r = await sampleFn.json(`${brief()}
+
+Below is a private journal entry he wrote in prayer and reflection. Find 0 to 3 posts hiding in it that could genuinely serve other men. Rules: keep anything about other people private and unidentifiable; turn confessions into general, hopeful lessons; never preach at the reader. If nothing is shareable, return an empty array.
+Scripture he noted: ${jDraft.scripture || "(none)"}
+ENTRY:
+${jDraft.text}
+
+Pillars: ${PILLARS.map(p => `${p.n} ${p.name}`).join("; ")}. Formats: carousel, quote (one statement on an image), reel, text.
+Reply with only a JSON array: [{"pillar": 1, "format": "quote", "title": "max 8 words", "hook": "max 14 words", "angle": "one sentence on what the post says"}]`, { modelTier: "complex", cache: false });
+    jIdeas = (Array.isArray(r) ? r : []).filter(x => x?.title || x?.hook).slice(0, 3).map(x => ({ ...x, pillar: P[x.pillar] ? Number(x.pillar) : 1, format: FORMATS[x.format] ? x.format : "carousel" }));
+  } catch (e) { jIdeas = null; toast(sampleError(e)); }
+  btn.disabled = false; const box = $("#j-ideas"); if (box) box.innerHTML = jIdeasHtml();
+}
+
+async function sampleImagesOk() { try { return !!(await sampleFn?.limits?.())?.images; } catch { return false; } }
+function renderSwipe() {
+  const b = $("#ins-body");
+  const analyzed = swipe.filter(x => x.analysis);
+  b.innerHTML = `
+    <div class="row" style="justify-content:space-between">
+      <p class="muted" style="margin:0;max-width:62ch">Screenshot posts you love from creators you study. Claude breaks down the hook pattern, structure, and look, so you can borrow the craft and keep your own message.</p>
+      <div class="row"><button class="btn" id="sw-style" ${sampleFn && analyzed.length >= 2 ? "" : "disabled"} title="Needs at least 2 analyzed posts">What do my favorites share?</button><button class="btn primary" id="sw-add">+ Add inspiration</button></div>
+    </div>
+    ${swipeBusy ? `<div class="busybar" role="status">${esc(swipeBusy)}</div>` : ""}
+    ${styleNotes ? `<div class="panel fields"><h3 style="font-size:22px">The style you're drawn to</h3><p class="serif" style="white-space:pre-wrap;margin:0">${esc(styleNotes)}</p><div class="row"><button class="btn primary small" id="sw-tovoice">Add to my voice guide</button><button class="btn ghost small" id="sw-hidestyle">Dismiss</button></div></div>` : ""}
+    <form class="panel fields" id="sw-form" ${swipeForm ? "" : "hidden"}>
+      <h3 style="font-size:22px">Add a post you admire</h3>
+      <label class="f" for="sw-files">Screenshots (up to 4: the first slides, or a few frames of a reel)<input type="file" id="sw-files" accept="image/png,image/jpeg,image/webp" multiple></label>
+      <div class="grid3" style="grid-template-columns:repeat(2,minmax(0,1fr))">
+        <label class="f" for="sw-creator">Creator<input type="text" id="sw-creator" placeholder="@handle"></label>
+        <label class="f" for="sw-link">Link to the post<input type="text" id="sw-link" placeholder="https://www.instagram.com/p/…"></label>
+      </div>
+      <label class="f" for="sw-note">What you love about it<textarea id="sw-note" rows="2" placeholder="The hook, the colors, the pacing, how it made you feel"></textarea></label>
+      <div class="row"><button class="btn primary" type="submit" id="sw-save">Save and analyze</button><button class="btn ghost" type="button" id="sw-cancel">Cancel</button></div>
+    </form>
+    <div class="swipe-grid">${swipe.length ? [...swipe].sort((a, c) => (c.created || "").localeCompare(a.created || "")).map(swipeCard).join("")
+      : `<div class="panel empty" style="grid-column:1/-1"><h2>Your swipe file is empty</h2><p>Add 5 to 10 posts from the creators you study. The patterns show up fast.</p></div>`}</div>`;
+}
+function swipeCard(x) {
+  const a = x.analysis;
+  return `<article class="swipe-card">
+    <div class="shots">${(x.images || []).map((im, i) => `<img src="${esc(im.url)}" alt="Screenshot ${i + 1}${x.creator ? " from " + esc(x.creator) : ""}" loading="lazy">`).join("") || `<div class="muted" style="padding:20px">No screenshots</div>`}</div>
+    <div class="body">
+      <div class="row" style="justify-content:space-between"><b>${esc(x.creator || a?.creator || "Saved post")}</b>${a?.format ? `<span class="fmt" style="font-size:11px;font-weight:700;text-transform:uppercase">${esc(a.format)}</span>` : ""}</div>
+      ${x.note ? `<p class="serif" style="margin:0;font-style:italic">“${esc(x.note)}”</p>` : ""}
+      ${a ? `<dl>
+        ${a.hookPattern ? `<dt>Hook pattern</dt><dd>${esc(a.hookPattern)}${a.hook ? `<br><span class="muted">“${esc(a.hook)}”</span>` : ""}</dd>` : ""}
+        ${a.structure ? `<dt>Structure</dt><dd>${esc(a.structure)}</dd>` : ""}
+        ${a.look ? `<dt>Look</dt><dd>${esc(a.look)}</dd>` : ""}
+        ${a.why ? `<dt>Why it works</dt><dd>${esc(a.why)}</dd>` : ""}
+      </dl>` : `<p class="muted" style="margin:0">Not analyzed yet.</p>`}
+      <div class="row" style="margin-top:4px">
+        ${a ? `<select data-swpillar="${x.id}" aria-label="Pillar to remix into" style="width:auto;padding:4px 8px">${PILLARS.map(p => `<option value="${p.n}">${esc(p.short)}</option>`).join("")}</select><button class="btn small primary" data-swremix="${x.id}" ${sampleFn ? "" : "disabled"}>Remix for me</button>`
+          : `<button class="btn small sun" data-swanalyze="${x.id}" ${sampleFn ? "" : "disabled"}>Analyze</button>`}
+        ${/^https?:\/\//.test(x.link || "") ? `<a href="${esc(x.link)}" target="_blank" rel="noopener" style="font-size:13px;color:var(--pine);font-weight:600">Original ↗</a>` : ""}
+        <button class="btn small ghost danger" data-swdel="${x.id}">Delete</button>
+      </div>
+      <div class="note" data-swconfirm="${x.id}" hidden>Delete this from your swipe file? <button class="btn small danger" data-swdelyes="${x.id}">Delete</button></div>
+    </div>
+  </article>`;
+}
+async function analyzeSwipe(item, blobs) {
+  const imgsOk = await sampleImagesOk();
+  if (!blobs && imgsOk) blobs = await Promise.all((item.images || []).slice(0, 4).map(im => fetch(im.url).then(r => r.blob()).catch(() => null))).then(a => a.filter(Boolean));
+  const r = await sampleFn.json(`You are helping a Christian holistic-health creator study a social post he admires, to learn its craft. Never suggest copying its words or topic.
+${imgsOk && blobs?.length ? "The attached images are screenshots of the post." : "No images are available; work from his notes only and say less rather than guess."}
+Creator: ${item.creator || "(unknown)"}. His note on what he loves: ${item.note || "(none)"}.
+Reply with only JSON:
+{"creator": "handle if visible, else empty", "format": "carousel, reel, quote, photo, or text",
+ "hook": "the hook text as shown, verbatim if legible, else empty",
+ "hookPattern": "the reusable pattern behind the hook, e.g. 'contrarian claim + proof'",
+ "structure": "how the post unfolds, slide by slide or beat by beat, in 1-2 sentences",
+ "look": "visual style: palette, typography, photo style, lighting, layout, in 1-2 sentences",
+ "why": "why it works for its audience, in 1 sentence"}`, { modelTier: "complex", cache: false, ...(imgsOk && blobs?.length ? { images: blobs } : {}) });
+  return { creator: String(r?.creator || ""), format: String(r?.format || ""), hook: String(r?.hook || ""), hookPattern: String(r?.hookPattern || ""), structure: String(r?.structure || ""), look: String(r?.look || ""), why: String(r?.why || "") };
+}
+async function addSwipe(form) {
+  const files = [...($("#sw-files").files || [])].slice(0, 4);
+  const item = { id: "s" + Date.now().toString(36), creator: $("#sw-creator").value.trim(), link: $("#sw-link").value.trim(), note: $("#sw-note").value.trim(), images: [], created: new Date().toISOString() };
+  if (!files.length && !item.note) { toast("Add a screenshot or a note"); return; }
+  if (files.length && !assets) { toast("Screenshot upload needs this page open on claude.ai"); return; }
+  swipeForm = false; swipeBusy = files.length ? `Uploading ${files.length} screenshot${files.length > 1 ? "s" : ""}…` : "Saving…"; renderSwipe();
+  try {
+    for (const f of files) { const a = await assets.upload(f); item.images.push({ url: a.url, id: a.id }); }
+    await store.saveDoc("swipe", item);
+    if (sampleFn) { swipeBusy = "Claude is studying the post…"; renderSwipe(); item.analysis = await analyzeSwipe(item, files); await store.saveDoc("swipe", item); }
+    toast("Saved to your swipe file");
+  } catch (e) { toast(e?.code ? sampleError(e) : e?.message || "Couldn't save. Try again."); }
+  swipeBusy = null; renderSwipe();
+}
+$("#v-inspire").addEventListener("click", async e => {
+  const b = e.target.closest("button"); if (!b) return;
+  if (b.dataset.itab) { inspireTab = b.dataset.itab; renderInspire(); return; }
+  // Journal
+  if (b.dataset.jprompt) { const ta = $("#j-text"); jDraft.text = (jDraft.text ? jDraft.text.replace(/\s*$/, "") + "\n\n" : "") + b.dataset.jprompt + "\n"; ta.value = jDraft.text; ta.focus(); ta.setSelectionRange(ta.value.length, ta.value.length); queueJournalSave(); }
+  else if (b.dataset.jopen) { clearTimeout(jTimer); jDraft = structuredClone(journal.find(x => x.id === b.dataset.jopen)); jSel = jDraft.id; jIdeas = null; renderJournal(); }
+  else if (b.id === "j-new") { clearTimeout(jTimer); jDraft = { id: "j" + Date.now().toString(36), date: TODAY, scripture: "", text: "" }; jSel = jDraft.id; jIdeas = null; renderJournal(); $("#j-text").focus(); }
+  else if (b.id === "j-mine") mineJournal(b);
+  else if (b.id === "j-del") $("#j-delconfirm").hidden = false;
+  else if (b.id === "j-delno") $("#j-delconfirm").hidden = true;
+  else if (b.id === "j-delyes") { clearTimeout(jTimer); try { if (journal.some(x => x.id === jDraft.id)) await store.removeDoc("journal", jDraft.id); } catch {} jDraft = null; jIdeas = null; toast("Entry deleted"); renderJournal(); }
+  else if (b.dataset.jadd !== undefined) {
+    const x = jIdeas[Number(b.dataset.jadd)];
+    await store.save({ ...blankPost(), id: uid(), pillar: x.pillar, format: x.format, title: String(x.title || x.hook), hook: String(x.hook || ""), angle: String(x.angle || ""), source: "journal" });
+    x.added = true; $("#j-ideas").innerHTML = jIdeasHtml(); toast("Added to your bank as an idea");
+  }
+  // Swipe
+  else if (b.id === "sw-add") { swipeForm = true; renderSwipe(); $("#sw-files")?.focus(); }
+  else if (b.id === "sw-cancel") { swipeForm = false; renderSwipe(); }
+  else if (b.id === "sw-hidestyle") { styleNotes = ""; renderSwipe(); }
+  else if (b.id === "sw-tovoice") {
+    voice.notes = `${(voice.notes || "").trim()}\n\nStyle I'm drawn to (from my swipe file):\n${styleNotes}`.trim();
+    try { await store.saveVoice(); toast("Added to your voice guide"); styleNotes = ""; renderSwipe(); } catch { toast("Couldn't save the guide."); }
+  }
+  else if (b.id === "sw-style") {
+    b.disabled = true; swipeBusy = "Looking for what your favorites share…"; renderSwipe();
+    try {
+      const r = await sampleFn.json(`Here are breakdowns of social posts a Christian holistic-health creator admires. Find what they share so he can build his own consistent style. Be concrete and observable.
+${swipe.filter(x => x.analysis).map(x => `- ${x.creator || "?"} (${x.analysis.format}): hook pattern: ${x.analysis.hookPattern}; structure: ${x.analysis.structure}; look: ${x.analysis.look}; he loves: ${x.note || "-"}`).join("\n")}
+Reply with only JSON: {"notes": "6-10 short '- ' bullet lines covering hooks, structure, pacing, visual look, and tone"}`, { modelTier: "complex", cache: false });
+      styleNotes = String(r?.notes || "").trim();
+    } catch (err) { toast(sampleError(err)); }
+    swipeBusy = null; renderSwipe();
+  }
+  else if (b.dataset.swanalyze) {
+    const item = swipe.find(x => x.id === b.dataset.swanalyze); if (!item) return;
+    swipeBusy = "Claude is studying the post…"; renderSwipe();
+    try { await store.saveDoc("swipe", { ...structuredClone(item), analysis: await analyzeSwipe(item) }); } catch (err) { toast(sampleError(err)); }
+    swipeBusy = null; renderSwipe();
+  }
+  else if (b.dataset.swremix) {
+    const item = swipe.find(x => x.id === b.dataset.swremix); if (!item?.analysis) return;
+    const a = item.analysis, pillar = Number($(`[data-swpillar="${item.id}"]`).value);
+    const fmt = /reel|video/i.test(a.format) ? "reel" : /quote|text/i.test(a.format) && !/carousel/i.test(a.format) ? (a.format.includes("text") ? "text" : "quote") : "carousel";
+    genState = { ...genState, pillar, format: fmt, angle: "", result: null, error: "", date: nextEmptyDate(),
+      model: `Hook pattern: ${a.hookPattern}\nStructure: ${a.structure}\nWhy it works: ${a.why}` };
+    go("generate"); toast("Pick an angle. Claude will borrow that post's structure.");
+  }
+  else if (b.dataset.swdel) $(`[data-swconfirm="${b.dataset.swdel}"]`).hidden = false;
+  else if (b.dataset.swdelyes) { try { await store.removeDoc("swipe", b.dataset.swdelyes); toast("Removed"); } catch { toast("Couldn't delete."); } }
+});
+$("#v-inspire").addEventListener("submit", e => { if (e.target.id === "sw-form") { e.preventDefault(); addSwipe(e.target); } });
+$("#v-inspire").addEventListener("input", e => {
+  if (!jDraft) return;
+  const t = e.target;
+  if (t.id === "j-text") jDraft.text = t.value; else if (t.id === "j-scrip") jDraft.scripture = t.value; else if (t.id === "j-date") jDraft.date = t.value; else return;
+  queueJournalSave();
 });
 
 /* ---------- Content tree ---------- */

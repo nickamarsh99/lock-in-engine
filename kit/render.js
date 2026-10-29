@@ -11,6 +11,7 @@ const FACES = [
   ["Barlow Condensed", 700, "normal", "BarlowCondensed-Bold.ttf"],
   ["Barlow", 700, "normal", "Barlow-Bold.ttf"],
   ["Newsreader", 400, "normal", "Newsreader-Regular.ttf"],
+  ["Newsreader", 500, "normal", "Newsreader-Medium.ttf"],
   ["Newsreader", 400, "italic", "Newsreader-Italic.ttf"],
 ];
 const PILLAR_SHORT = { 1: "Faith", 2: "Rhythms", 3: "Gut & Food", 4: "Table", 5: "Strength", 6: "Home & Discernment", 7: "Community", 8: "Calling" };
