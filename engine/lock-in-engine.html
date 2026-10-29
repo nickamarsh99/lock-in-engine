@@ -36,6 +36,13 @@ h1, h2, h3 { font-family: var(--f-display); font-weight: 800; text-transform: up
 /* Top bar */
 .top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--bg); border-bottom: 1px solid var(--line) }
 .top .wrap { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 20px; padding-block: 12px }
+.subnav { border-top: 1px solid var(--line) }
+.subnav .wrap { padding-block: 0 }
+.tabs { display: flex; gap: 2px; overflow-x: auto; scrollbar-width: none }
+.tabs::-webkit-scrollbar { display: none }
+.tabs a { text-decoration: none; color: var(--muted); font-weight: 600; font-size: 14px; padding: 10px 14px; border-bottom: 2.5px solid transparent; white-space: nowrap }
+.tabs a[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--sun) }
+.tabs a .ct { font-size: 12px; color: var(--muted); font-weight: 700; margin-left: 4px; font-variant-numeric: tabular-nums }
 .brand { display: flex; align-items: center; gap: 10px; margin-right: auto }
 .sunmark { width: 26px; height: 26px; border-radius: 50%; background: var(--sun); box-shadow: inset 0 -9px 0 0 var(--pine) }
 .brand h1 { font-size: 24px }
@@ -227,6 +234,47 @@ textarea { resize: vertical; line-height: 1.45 }
 .fmt { border: 1px solid currentColor; border-radius: 4px; padding: 0 5px; font-size: 10px }
 .busybar { display: flex; gap: 10px; align-items: center; background: var(--sun-soft); border-radius: var(--r); padding: 10px 14px; font-weight: 600 }
 
+/* Library */
+.lib-bar { display: grid; gap: 10px }
+.lib-bar .lib-row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center }
+.lib-bar input[type=search] { flex: 1 1 260px; background: var(--surface); border: 1px solid var(--line); border-radius: 999px; padding: 9px 16px; font-size: 15px }
+.lib-bar select { width: auto; background: var(--surface); padding: 6px 10px }
+.bulk { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; background: var(--sun-soft); border-radius: var(--r); padding: 8px 12px; font-weight: 600 }
+.bulk select { width: auto; padding: 4px 8px }
+.tablewrap { overflow-x: auto; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r) }
+table.lib { width: 100%; border-collapse: collapse; font-size: 14px }
+table.lib th { text-align: left; font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); padding: 10px 10px; border-bottom: 1px solid var(--line); white-space: nowrap }
+table.lib td { padding: 8px 10px; border-bottom: 1px solid var(--line); vertical-align: middle }
+table.lib tr:last-child td { border-bottom: 0 }
+table.lib tbody tr { cursor: pointer }
+table.lib tbody tr:hover { background: color-mix(in srgb, var(--sun-soft) 45%, transparent) }
+table.lib tr.sel { background: var(--sun-soft) }
+table.lib .ttl b { display: block; overflow-wrap: anywhere }
+table.lib .ttl span { color: var(--muted); font-size: 13px; display: block; overflow-wrap: anywhere }
+table.lib .ttl em { color: var(--danger); font-style: normal; font-size: 12px; font-weight: 600 }
+table.lib canvas, table.lib .ph { width: 44px; aspect-ratio: 4 / 5; border-radius: 4px; display: block; border: 1px solid var(--line) }
+table.lib .ph { background: var(--bg) }
+table.lib select { width: auto; padding: 3px 6px; font-size: 13px; background: var(--bg) }
+table.lib .num { font-variant-numeric: tabular-nums; white-space: nowrap; color: var(--muted) }
+@media (max-width: 760px) {
+  table.lib thead { display: none }
+  table.lib, table.lib tbody { display: block }
+  table.lib tr { display: grid; grid-template-columns: 24px 48px minmax(0, 1fr); gap: 4px 10px; padding: 10px; border-bottom: 1px solid var(--line) }
+  table.lib td { padding: 0; border: 0 }
+  table.lib td.c-sel { grid-row: span 2 } table.lib td.c-img { grid-row: span 2 }
+  table.lib td.c-meta { grid-column: 3; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; font-size: 12px }
+  table.lib td.c-fmt, table.lib td.c-pil, table.lib td.c-st, table.lib td.c-date, table.lib td.c-ed { display: none }
+}
+@media (min-width: 761px) { table.lib td.c-meta { display: none } }
+/* Feed grid */
+.feed { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 3px; max-width: 600px; margin: 0 auto; background: var(--surface); padding: 3px; border-radius: 6px; border: 1px solid var(--line) }
+.feed button { position: relative; border: 0; padding: 0; background: var(--bg); aspect-ratio: 3 / 4; overflow: hidden; display: block }
+.feed canvas { width: 100%; height: 100%; object-fit: cover; display: block }
+.feed .badge { position: absolute; left: 6px; top: 6px; font-size: 10px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; background: rgba(20,14,10,.72); color: #FFF4E6; padding: 2px 6px; border-radius: 4px }
+.feed .fmtb { position: absolute; right: 6px; top: 6px; font-size: 10px; font-weight: 800; background: rgba(255,248,238,.85); color: #2B2620; padding: 2px 6px; border-radius: 4px; text-transform: uppercase }
+.feed-profile { max-width: 600px; margin: 0 auto; display: flex; gap: 14px; align-items: center }
+.feed-profile .av { width: 64px; height: 64px; border-radius: 50%; background: radial-gradient(circle at 70% 75%, #FFE0A6 0 22%, transparent 23%), linear-gradient(180deg, #1E2142, #A9586C 70%, #F0A267); flex: none }
+
 /* Inspire */
 .ins { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 18px; align-items: start }
 @media (max-width: 900px) { .ins { grid-template-columns: minmax(0, 1fr) } }
@@ -296,20 +344,21 @@ textarea { resize: vertical; line-height: 1.45 }
     <div class="brand"><span class="sunmark" aria-hidden="true"></span><div><h1>Lock-In Engine</h1><small>One idea a day. Six placements. Thirty days.</small></div></div>
     <span class="daybadge" id="daybadge"></span>
     <nav aria-label="Views">
-      <a href="#sprint" data-v="sprint">Sprint</a>
-      <a href="#bank" data-v="bank">Bank</a>
-      <a href="#studio" data-v="studio">Studio</a>
-      <a href="#generate" data-v="generate">Generate</a>
-      <a href="#tree" data-v="tree">Tree</a>
-      <a href="#inspire" data-v="inspire">Inspire</a>
-      <a href="#playbook" data-v="playbook">Playbook</a>
+      <a href="#sprint" data-g="sprint">Sprint</a>
+      <a href="#bank" data-g="content">Content</a>
+      <a href="#generate" data-g="ideas">Ideas</a>
+      <a href="#tree" data-g="tree">Tree</a>
+      <a href="#playbook" data-g="playbook">Playbook</a>
     </nav>
   </div>
+  <div class="subnav" id="subnav" hidden><div class="wrap"><div class="tabs" id="subtabs" role="tablist" aria-label="Sections"></div></div></div>
 </header>
 
 <main class="wrap">
   <section class="view" id="v-sprint"></section>
   <section class="view" id="v-bank" hidden></section>
+  <section class="view" id="v-library" hidden></section>
+  <section class="view" id="v-grid" hidden></section>
   <section class="view" id="v-studio" hidden></section>
   <section class="view" id="v-generate" hidden></section>
   <section class="view" id="v-tree" hidden></section>
@@ -388,10 +437,15 @@ const THEMES = {
   linen:  { label: "Linen Sun",    stops: [[0, "#F6EFE3"], [1, "#EEDFC9"]],                                      fg: "#3A2516", accent: "#BC5C27", soft: "rgba(58,37,22,.74)",    sun: { x: .82, y: .16, r: 120, c: "#F2A35E" } },
   ember:  { label: "Ember",        stops: [[0, "#17120F"], [0.6, "#231913"], [1, "#3F2416"]],                    fg: "#F4E9DC", accent: "#E9A25A", soft: "rgba(244,233,220,.78)", sun: { x: .5, y: 1.05, r: 170, c: "#D9733A" } },
   journal:{ label: "Journal",      stops: [[0, "#F4EFE5"], [1, "#ECE3D3"]],                                      fg: "#2B2620", accent: "#8C5A2B", soft: "rgba(43,38,32,.72)", sun: { x: .5, y: .5, r: 0, c: "#000000" }, serif: true },
+  olive:  { label: "Olive Grove",  stops: [[0, "#414A33"], [0.6, "#333B28"], [1, "#262D1E"]],                    fg: "#F2ECDD", accent: "#DDB86E", soft: "rgba(242,236,221,.78)", sun: { x: .84, y: .12, r: 85,  c: "#E9C987" } },
+  mist:   { label: "Morning Mist", stops: [[0, "#D7DEE2"], [0.55, "#E9E2D8"], [1, "#F3D3B4"]],                    fg: "#24303A", accent: "#B05A35", soft: "rgba(36,48,58,.74)",    sun: { x: .5, y: 1.04, r: 150, c: "#FFE7C9" } },
+  harvest:{ label: "Harvest",      stops: [[0, "#F0DDB5"], [0.6, "#E2BE82"], [1, "#CF9C5C"]],                    fg: "#2E1D0F", accent: "#7A3B15", soft: "rgba(46,29,15,.76)",    sun: { x: .82, y: .15, r: 105, c: "#FFF1D2" } },
+  rose:   { label: "Desert Rose",  stops: [[0, "#F2D8CC"], [0.6, "#E6B5A2"], [1, "#CF8E7A"]],                    fg: "#2E1B1A", accent: "#8E3B2E", soft: "rgba(46,27,26,.76)",    sun: { x: .8, y: .14, r: 100, c: "#FFF0E6" } },
   pine:   { label: "Evening Pine", stops: [[0, "#24432F"], [1, "#152A1F"]],                                      fg: "#F2EEE3", accent: "#E8B04B", soft: "rgba(242,238,227,.74)", sun: { x: .85, y: .13, r: 70,  c: "#E8B04B" } },
 };
 // "Auto" picks a look per pillar so the grid reads as one family with variety.
 const PILLAR_THEME = { 1: "dusk", 2: "dawn", 3: "sage", 4: "golden", 5: "clay", 6: "linen", 7: "golden", 8: "pine" };
+const DARK_LOOKS = new Set(["dawn", "clay", "dusk", "pine", "ember", "olive"]);
 const FORMATS = { carousel: "Carousel", quote: "Quote", reel: "Reel", text: "Text post" };
 const themeKey = post => THEMES[post.theme] ? post.theme : THEMES[settings.theme] ? settings.theme : post.format === "quote" ? (post.pillar === 1 ? "journal" : "ember") : PILLAR_THEME[post.pillar] || "dawn";
 const themeSwatch = k => `linear-gradient(180deg, ${THEMES[k].stops.map(([o, c]) => `${c} ${Math.round(o * 100)}%`).join(", ")})`;
@@ -543,22 +597,47 @@ function nextEmptyDate() {
 }
 
 /* ---------- Routing ---------- */
-const VIEWS = ["sprint", "bank", "studio", "generate", "tree", "inspire", "playbook"];
+const VIEWS = ["sprint", "bank", "library", "grid", "studio", "generate", "journal", "swipe", "tree", "playbook"];
+const GROUPS = {
+  content: [["bank", "Board"], ["library", "Library"], ["grid", "Feed grid"], ["studio", "Studio"]],
+  ideas: [["generate", "Generate"], ["journal", "Journal"], ["swipe", "Swipe file"]],
+};
+const SECTION = { journal: "inspire", swipe: "inspire" };
+const groupOf = v => Object.keys(GROUPS).find(g => GROUPS[g].some(([k]) => k === v)) || v;
+const lastInGroup = {};
+try { Object.assign(lastInGroup, JSON.parse(localStorage.getItem("lie-last") || "{}")); } catch {}
 let view = "sprint";
 function route() {
-  const h = location.hash.slice(1);
+  let h = location.hash.slice(1);
+  if (h === "inspire") h = "journal";
   view = VIEWS.includes(h) ? h : "sprint";
-  VIEWS.forEach(v => { $("#v-" + v).hidden = v !== view; });
-  document.querySelectorAll("nav a").forEach(a => { if (a.dataset.v === view) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current"); });
+  const sec = SECTION[view] || view, grp = groupOf(view);
+  document.querySelectorAll("main > .view").forEach(el => { el.hidden = el.id !== "v-" + sec; });
+  if (GROUPS[grp]) { lastInGroup[grp] = view; try { localStorage.setItem("lie-last", JSON.stringify(lastInGroup)); } catch {} }
+  document.querySelectorAll("nav a").forEach(a => {
+    const g = a.dataset.g; if (GROUPS[g]) a.href = "#" + (lastInGroup[g] || GROUPS[g][0][0]);
+    if (g === grp) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current");
+  });
+  renderSubnav();
+  if (view === "journal" || view === "swipe") inspireTab = view;
+  if (view === "library") renderLibrary();
+  if (view === "grid") renderGrid();
   if (view === "studio") renderStudio();
   if (view === "generate") renderGenerate();
   if (view === "tree") renderTree();
   if (view === "bank") renderBank();
-  if (view === "inspire") renderInspire();
+  if (SECTION[view] === "inspire") renderInspire();
   window.scrollTo(0, 0);
 }
 window.addEventListener("hashchange", route);
 function go(v) { if (location.hash === "#" + v) route(); else location.hash = v; }
+function renderSubnav() {
+  const grp = groupOf(view), bar = $("#subnav");
+  if (!GROUPS[grp]) { bar.hidden = true; return; }
+  bar.hidden = false;
+  const count = { bank: posts.filter(p => p.status !== "posted").length, library: posts.length, journal: journal.length, swipe: swipe.length };
+  $("#subtabs").innerHTML = GROUPS[grp].map(([k, l]) => `<a href="#${k}" role="tab" aria-selected="${k === view}">${l}${count[k] ? `<span class="ct">${count[k]}</span>` : ""}</a>`).join("");
+}
 
 function onData() {
   const day = Math.min(Math.max(daysBetween(settings.sprintStart, TODAY) + 1, 0), settings.sprintDays);
@@ -566,6 +645,9 @@ function onData() {
   renderSprint();
   if (!$("#v-playbook").contains(document.activeElement)) renderPlaybook();
   if (view === "bank" && !bankBusy) renderBank();
+  if (view === "library" && !$("#v-library").contains(document.activeElement)) renderLibrary(); else if (view === "library") drawLibraryRows();
+  if (view === "grid") renderGrid();
+  renderSubnav();
   if (view === "studio") { if (!draft || draft.id !== selectedId || !$("#e-title")) renderStudio(); else renderStudioList(); }
 }
 
@@ -682,7 +764,7 @@ const SHAPES = {
  "slides": [{"h": "headline", "b": "body"}],
  ${SHAPE_COMMON},
  "script": "30-45 second talking-head script for Reels/TikTok/Shorts. Lines: HOOK (0-3s): ... then [ON SCREEN: ...] cues and short beats, then CTA: ..."}
-Slides: 6 to 8 total. Slide 1: h = the hook, b = one short line that makes them swipe. Middle slides: one idea each, h max 7 words, b max 38 words, concrete and practical. Last slide: h invites a save, share, or follow (never a purchase), b one warm sentence.`,
+Slides: 6 to 8 total. Slide 1: h = the hook, b = one short line that makes them swipe. Middle slides: one idea each, h max 6 words, b max 22 words, concrete and practical. Short, calm lines that breathe on the page; cut every word that isn't doing work. Last slide: h invites a save, share, or follow (never a purchase), b one warm sentence.`,
   quote: `This is a QUOTE post: one strong statement set large on a single image, like a page from a journal. Mindset, conviction, and faith, said plainly.
 Reply with only JSON in this exact shape:
 {"title": "internal name, max 8 words",
@@ -735,7 +817,7 @@ function sampleError(e) {
 }
 
 /* ---------- Generate view ---------- */
-let genState = { pillar: 3, format: "carousel", angle: "", product: "", model: "", date: "", result: null, busy: false, stream: "", error: "" };
+let genState = { pillar: 3, format: "carousel", theme: "", type: "", angle: "", product: "", model: "", date: "", result: null, busy: false, stream: "", error: "" };
 let genAbort = null;
 function renderGenerate() {
   const el = $("#v-generate");
@@ -761,6 +843,10 @@ function renderGenerate() {
             <select id="g-product"><option value="">None</option>${PRODUCTS.map(x => `<option${x === genState.product ? " selected" : ""}>${esc(x)}</option>`).join("")}</select></label>
           <label class="f" for="g-date">Schedule for<input type="date" id="g-date" value="${esc(genState.date)}"></label>
         </div>
+        <div class="grid3" style="grid-template-columns:repeat(2,minmax(0,1fr))">
+          <label class="f" for="g-theme">Look<select id="g-theme"><option value="">Auto by pillar</option>${Object.entries(THEMES).map(([k, t]) => `<option value="${k}"${k === genState.theme ? " selected" : ""}>${t.label}</option>`).join("")}</select></label>
+          <label class="f" for="g-type">Type<select id="g-type">${[["", "Auto"], ["bold", "Bold"], ["serif", "Serif"]].map(([k, l]) => `<option value="${k}"${k === genState.type ? " selected" : ""}>${l}</option>`).join("")}</select></label>
+        </div>
         <div class="row">
           <button class="btn primary" id="g-go" ${!sampleFn || genState.busy ? "disabled" : ""}>${genState.busy ? "Writing…" : r ? "Write another version" : "Write the post"}</button>
           ${genState.busy ? `<button class="btn ghost" id="g-stop">Stop</button>` : ""}
@@ -769,7 +855,7 @@ function renderGenerate() {
       </div>
       <div class="panel result" id="g-result">
         ${genState.busy ? `<p class="eyebrow">Claude is writing</p><div class="stream" id="g-stream">${esc(genState.stream || "Thinking…")}</div>`
-        : r ? `<p class="eyebrow"><span class="chip"><span class="dot" style="background:${pColor(genState.pillar)}"></span>${esc(p.short)}</span></p>
+        : r ? `${r.slides.length ? `<div class="previews" id="g-previews" style="margin-bottom:12px"></div>` : ""}<p class="eyebrow"><span class="chip"><span class="dot" style="background:${pColor(genState.pillar)}"></span>${esc(p.short)}</span></p>
             <h3>${esc(r.hook)}</h3><p class="muted" style="margin:0">${esc(r.title)}</p>
             <ol>${r.slides.map(s => `<li><b>${esc(s.h)}</b>${esc(s.b)}</li>`).join("")}</ol>
             <p class="eyebrow" style="margin-top:16px">Caption</p><p class="serif" style="white-space:pre-wrap;margin:0">${esc(r.caption)}</p>
@@ -788,7 +874,7 @@ $("#v-generate").addEventListener("click", async e => {
   if (e.target.id === "g-unmodel") { genState.model = ""; renderGenerate(); return; }
   if (e.target.id === "g-add" || e.target.id === "g-bank") {
     const id = uid(), toBank = e.target.id === "g-bank";
-    await store.save({ ...blankPost(), ...genState.result, ai: aiSnapshot(genState.result), id, pillar: genState.pillar, format: genState.format, date: toBank ? "" : genState.date, status: "drafted" });
+    await store.save({ ...blankPost(), ...genPost(), ai: aiSnapshot(genState.result), id, date: toBank ? "" : genState.date, status: "drafted" });
     genState = { ...genState, result: null, angle: "", date: "", model: "" };
     selectedId = id; toast(toBank ? "Added to your bank" : "Added to the calendar"); go("studio");
   }
@@ -797,9 +883,18 @@ $("#v-generate").addEventListener("change", e => {
   if (e.target.id === "g-pillar") { genState.pillar = Number(e.target.value); genState.angle = $("#g-angle").value; renderGenerate(); }
   if (e.target.id === "g-product") genState.product = e.target.value;
   if (e.target.id === "g-format") genState.format = e.target.value;
+  if (e.target.id === "g-theme" || e.target.id === "g-type") { genState[e.target.id === "g-theme" ? "theme" : "type"] = e.target.value; drawGenPreview(); }
   if (e.target.id === "g-date") genState.date = e.target.value;
 });
 $("#v-generate").addEventListener("input", e => { if (e.target.id === "g-angle") genState.angle = e.target.value; });
+function genPost() { return { ...genState.result, pillar: genState.pillar, format: genState.format, theme: genState.theme, type: genState.type }; }
+async function drawGenPreview() {
+  const box = $("#g-previews"); if (!box || !genState.result?.slides?.length) return;
+  await loadFonts();
+  const gp = genPost();
+  box.innerHTML = gp.slides.map((_, i) => `<figure><canvas width="${W}" height="${H}" aria-label="Slide ${i + 1} preview"></canvas></figure>`).join("");
+  box.querySelectorAll("canvas").forEach((cv, i) => drawSlide(cv, gp, i));
+}
 async function runGenerate() {
   genState = { ...genState, busy: true, stream: "", error: "" }; renderGenerate();
   genAbort = new AbortController();
@@ -809,7 +904,7 @@ async function runGenerate() {
     genState.result = cleanPost(r);
     if (!genState.result.slides.length && genState.format !== "text") throw { message: "Claude returned no slides. Try again." };
   } catch (e) { if (e?.code !== "aborted" && e?.name !== "AbortError") genState.error = sampleError(e); }
-  genState.busy = false; renderGenerate();
+  genState.busy = false; renderGenerate(); drawGenPreview();
 }
 async function fillEmptyDays(btn) {
   if (!sampleFn) { toast("Open on claude.ai to generate"); return; }
@@ -897,6 +992,8 @@ function renderStudio() {
             ${Object.entries(THEMES).map(([k, t]) => `<button data-theme-pick="${k}" aria-pressed="${draft.theme === k}" title="${t.label}" aria-label="${t.label}" style="background:${themeSwatch(k)}"></button>`).join("")}
             <span class="muted" id="e-themename" style="font-size:13px">${esc(THEMES[themeKey(draft)].label)}${THEMES[draft.theme] ? "" : " · auto"}</span>
           </div>
+          <div class="row" style="gap:8px"><span class="muted" style="font-size:13px">Type</span>
+            <div class="seg" role="group" aria-label="Headline type">${[["", "Auto"], ["bold", "Bold"], ["serif", "Serif"]].map(([k, l]) => `<button data-type-pick="${k}" aria-pressed="${(draft.type || "") === k}" style="${k === "serif" ? "font-family:var(--f-serif)" : k === "bold" ? "font-family:var(--f-display);text-transform:uppercase" : ""}">${l}</button>`).join("")}</div></div>
           <div class="previews" id="e-previews"></div>
           <div class="row" style="font-size:13px"><span class="muted">Slide 1 photo:</span>
             <label class="btn small" for="e-cover" style="cursor:pointer">${draft.cover ? "Replace photo" : "Add your photo"}</label>
@@ -1010,6 +1107,9 @@ studio.addEventListener("click", async e => {
     const i = Number(t.dataset.sphoto);
     if (draft.slides[i]?.photo) { delete draft.slides[i].photo; renderSlideEditors(); drawPreviews(); queueSave(); }
     else { const f = $("#e-slidephoto"); f.dataset.idx = i; f.click(); }
+  }
+  else if (t.dataset.typePick !== undefined) {
+    draft.type = t.dataset.typePick; studio.querySelectorAll("[data-type-pick]").forEach(b => b.setAttribute("aria-pressed", b === t)); drawPreviews(); queueSave();
   }
   else if (t.id === "e-uncover") { delete draft.cover; delete draft.coverId; renderStudio(); queueSave(); }
   else if (t.id === "e-film") openPrompter(draft.script);
@@ -1143,7 +1243,7 @@ function drawSlide(cv, post, i) {
   const photoUrl = s.photo || (i === 0 ? post.cover : null), photo = photoUrl ? imgCache[photoUrl] : null;
   const base = THEMES[themeKey(post)];
   const T = photo ? { ...base, fg: "#FFF6EA", soft: "rgba(255,246,234,.85)", accent: base.serif ? "#E9C08A" : base.accent, foot: null } : base;
-  const sf = !!base.serif, up = t => sf ? t : t.toUpperCase(), lhD = sf ? 1.08 : 0.94;
+  const sf = post.type ? post.type === "serif" : !!base.serif, up = t => sf ? t : t.toUpperCase(), lhD = sf ? 1.08 : 0.94;
   const display = sz => sf ? `500 ${sz}px "Newsreader", Georgia, serif` : `800 ${sz}px "Barlow Condensed", "Arial Narrow", sans-serif`;
   const bold = sz => sf ? `500 ${sz}px "Newsreader", Georgia, serif` : `700 ${sz}px "Barlow Condensed", "Arial Narrow", sans-serif`;
   const serif = (sz, it) => `${it ? "italic " : ""}400 ${sz}px "Newsreader", Georgia, serif`;
@@ -1509,13 +1609,14 @@ function bankCard(p) {
     <div class="acts">${acts}${p.date ? `<span class="when">${esc(fmtDay(p.date))}</span>` : ""}</div>
   </article>`;
 }
-async function drawThumbs() {
-  const cvs = [...document.querySelectorAll("#v-bank canvas[data-thumb]")]; if (!cvs.length) return;
+async function drawThumbs(root = "#v-bank") {
+  const cvs = [...document.querySelectorAll(root + " canvas[data-thumb]")]; if (!cvs.length) return;
   await loadFonts();
   for (const cv of cvs) {
     const p = posts.find(x => x.id === cv.dataset.thumb); if (!p || !cv.isConnected) continue;
     await Promise.all(postPhotos(p).slice(0, 2).map(loadImage));
-    const ctx = cv.getContext("2d"); ctx.setTransform(216 / W, 0, 0, 270 / H, 0, 0); drawSlide(cv, p, 0);
+    const tp = p.format === "text" || !p.slides?.length ? { ...p, format: "quote", theme: p.theme || "journal", slides: [{ h: p.hook || p.title || "", b: "" }] } : p;
+    const ctx = cv.getContext("2d"); ctx.setTransform(cv.width / W, 0, 0, cv.height / H, 0, 0); drawSlide(cv, tp, 0);
   }
 }
 async function setStatus(id, status) {
@@ -1601,11 +1702,185 @@ bv.addEventListener("dragover", e => { const col = e.target.closest("[data-col]"
 bv.addEventListener("dragleave", e => { const col = e.target.closest("[data-col]"); if (col && !col.contains(e.relatedTarget)) col.classList.remove("drop"); });
 bv.addEventListener("drop", e => { const col = e.target.closest("[data-col]"); if (!col) return; e.preventDefault(); col.classList.remove("drop"); const id = e.dataTransfer.getData("text/plain"); if (id) setStatus(id, col.dataset.col); });
 
+/* ---------- Library: every post, searchable ---------- */
+const STATUS_LABEL = { idea: "Idea", drafted: "Draft", ready: "Ready", posted: "Posted" };
+const lib = { q: "", st: ["idea", "drafted", "ready"], fmt: "all", pil: 0, sched: "all", sort: "updated" };
+try { Object.assign(lib, JSON.parse(localStorage.getItem("lie-lib") || "{}"), { q: "" }); } catch {}
+let libSel = new Set(), libConfirm = false;
+const saveLib = () => { try { localStorage.setItem("lie-lib", JSON.stringify({ ...lib, q: "" })); } catch {} };
+const hay = p => [p.title, p.hook, p.caption, p.script, p.xpost, p.angle, ...(p.slides || []).flatMap(x => [x.h, x.b])].join(" ").toLowerCase();
+function ago(iso) {
+  if (!iso) return "—";
+  const m = Math.round((Date.now() - new Date(iso)) / 60000);
+  return m < 60 ? `${Math.max(m, 1)}m ago` : m < 1440 ? `${Math.round(m / 60)}h ago` : m < 10080 ? `${Math.round(m / 1440)}d ago` : new Date(iso).toLocaleDateString(undefined, { month: "short", day: "numeric" });
+}
+function libList() {
+  const q = lib.q.trim().toLowerCase();
+  const out = posts.filter(p => lib.st.includes(p.status) && (lib.fmt === "all" || (p.format || "carousel") === lib.fmt) && (!lib.pil || p.pillar === lib.pil)
+    && (lib.sched === "all" || (lib.sched === "on" ? !!p.date : !p.date)) && (!q || hay(p).includes(q)));
+  const order = { idea: 0, drafted: 1, ready: 2, posted: 3 };
+  const sorters = {
+    updated: (a, b) => (b.updated || "").localeCompare(a.updated || ""),
+    date: (a, b) => (a.date || "9999").localeCompare(b.date || "9999"),
+    status: (a, b) => order[a.status] - order[b.status] || (b.updated || "").localeCompare(a.updated || ""),
+    pillar: (a, b) => a.pillar - b.pillar || (a.title || "").localeCompare(b.title || ""),
+    title: (a, b) => (a.title || a.hook || "").localeCompare(b.title || b.hook || ""),
+  };
+  return out.sort(sorters[lib.sort] || sorters.updated);
+}
+function renderLibrary() {
+  const el = $("#v-library");
+  if (storeMode === "loading") { el.innerHTML = `<div class="empty"><h2>Loading your library</h2></div>`; return; }
+  el.innerHTML = `
+    <div class="row" style="justify-content:space-between;align-items:end">
+      <div><p class="eyebrow">Every idea, draft, and post in one place</p><h2 style="font-size:clamp(30px,5vw,46px)">Library</h2></div>
+      <button class="btn primary" id="l-new">+ New post</button>
+    </div>
+    <div class="lib-bar">
+      <div class="lib-row">
+        <input type="search" id="l-q" placeholder="Search titles, hooks, captions, slides, scripts" value="${esc(lib.q)}" aria-label="Search posts">
+        <select id="l-sort" aria-label="Sort">${[["updated", "Recently edited"], ["date", "Post date"], ["status", "Status"], ["pillar", "Pillar"], ["title", "Title A–Z"]].map(([k, l]) => `<option value="${k}"${lib.sort === k ? " selected" : ""}>${l}</option>`).join("")}</select>
+      </div>
+      <div class="lib-row">
+        <div class="chips" role="group" aria-label="Status">${Object.entries({ idea: "Ideas", drafted: "Drafts", ready: "Ready", posted: "Posted" }).map(([k, l]) => `<button data-lst="${k}" aria-pressed="${lib.st.includes(k)}">${l} <span class="muted">${posts.filter(p => p.status === k).length}</span></button>`).join("")}</div>
+        <select id="l-fmt" aria-label="Format"><option value="all">All formats</option>${Object.entries(FORMATS).map(([k, l]) => `<option value="${k}"${lib.fmt === k ? " selected" : ""}>${l}</option>`).join("")}</select>
+        <select id="l-pil" aria-label="Pillar"><option value="0">All pillars</option>${PILLARS.map(p => `<option value="${p.n}"${lib.pil === p.n ? " selected" : ""}>${esc(p.short)}</option>`).join("")}</select>
+        <select id="l-sched" aria-label="Schedule"><option value="all">Any date</option><option value="on"${lib.sched === "on" ? " selected" : ""}>Scheduled</option><option value="off"${lib.sched === "off" ? " selected" : ""}>Unscheduled</option></select>
+      </div>
+    </div>
+    <div id="l-bulk"></div>
+    <div class="tablewrap"><table class="lib">
+      <thead><tr><th class="c-sel"><input type="checkbox" id="l-all" aria-label="Select all shown"></th><th></th><th>Post</th><th>Format</th><th>Pillar</th><th>Status</th><th>Date</th><th>Edited</th></tr></thead>
+      <tbody id="l-rows"></tbody>
+    </table></div>
+    <p class="muted" id="l-count" style="margin:0;font-size:13px"></p>`;
+  drawLibraryRows();
+}
+function drawLibraryRows() {
+  const body = $("#l-rows"); if (!body) return;
+  const list = libList();
+  libSel = new Set([...libSel].filter(id => posts.some(p => p.id === id)));
+  body.innerHTML = list.map(p => {
+    const f = p.format || "carousel", need = p.status === "drafted" ? missing(p) : [];
+    const stSel = `<select data-lstatus="${p.id}" aria-label="Status">${Object.entries(STATUS_LABEL).map(([k, l]) => `<option value="${k}"${p.status === k ? " selected" : ""}>${l}</option>`).join("")}</select>`;
+    return `<tr data-row="${p.id}"${libSel.has(p.id) ? ' class="sel"' : ""}>
+      <td class="c-sel"><input type="checkbox" data-lsel="${p.id}"${libSel.has(p.id) ? " checked" : ""} aria-label="Select ${esc(p.title || "post")}"></td>
+      <td class="c-img"><canvas width="132" height="165" data-thumb="${p.id}" aria-hidden="true"></canvas></td>
+      <td class="ttl"><b>${esc(p.title || p.hook || "Untitled")}</b>${p.hook && p.hook !== p.title ? `<span>${esc(p.hook)}</span>` : ""}${need.length ? `<em>Needs ${need.join(", ")}</em>` : ""}</td>
+      <td class="c-meta"><span class="fmt">${esc(FORMATS[f])}</span><span style="display:inline-flex;gap:4px;align-items:center"><i class="dot" style="background:${pColor(p.pillar)}"></i>${esc(P[p.pillar]?.short || "")}</span>${stSel}<span class="num">${p.date ? esc(fmtDay(p.date)) : "Unscheduled"}</span></td>
+      <td class="c-fmt"><span class="fmt" style="font-size:11px;font-weight:700;text-transform:uppercase">${esc(FORMATS[f])}</span></td>
+      <td class="c-pil"><span style="display:inline-flex;gap:6px;align-items:center;white-space:nowrap"><i class="dot" style="background:${pColor(p.pillar)}"></i>${esc(P[p.pillar]?.short || "")}</span></td>
+      <td class="c-st">${stSel}</td>
+      <td class="c-date num">${p.date ? esc(fmtDay(p.date)) : "—"}</td>
+      <td class="c-ed num">${ago(p.updated)}</td>
+    </tr>`;
+  }).join("") || `<tr><td colspan="8" class="muted" style="padding:28px;text-align:center;cursor:default">No posts match. Clear the search or turn on more statuses.</td></tr>`;
+  const all = $("#l-all"); if (all) { all.checked = list.length > 0 && list.every(p => libSel.has(p.id)); all.indeterminate = !all.checked && list.some(p => libSel.has(p.id)); }
+  $("#l-count").textContent = `${list.length} of ${posts.length} posts`;
+  drawBulk(); drawThumbs("#v-library");
+}
+function drawBulk() {
+  const box = $("#l-bulk"); if (!box) return;
+  const n = libSel.size, ideas = [...libSel].filter(id => posts.find(p => p.id === id)?.status === "idea").length;
+  box.innerHTML = n ? `<div class="bulk" role="region" aria-label="Bulk actions"><span>${n} selected</span>
+    <label for="l-move" style="display:inline-flex;gap:6px;align-items:center">Move to <select id="l-move"><option value="">…</option>${Object.entries(STATUS_LABEL).map(([k, l]) => `<option value="${k}">${l}</option>`).join("")}</select></label>
+    <button class="btn small" id="l-sched-btn">Schedule into open days</button>
+    ${ideas ? `<button class="btn small sun" id="l-draft" ${sampleFn ? "" : "disabled"}>Draft ${ideas} idea${ideas > 1 ? "s" : ""} with Claude</button>` : ""}
+    ${libConfirm ? `<span>Delete ${n} for good? <button class="btn small danger" id="l-delyes">Delete</button> <button class="btn small ghost" id="l-delno">Keep</button></span>` : `<button class="btn small ghost danger" id="l-del">Delete</button>`}
+    <button class="btn small ghost" id="l-clear">Clear</button></div>` : "";
+}
+const lv = $("#v-library");
+lv.addEventListener("input", e => { if (e.target.id === "l-q") { lib.q = e.target.value; drawLibraryRows(); } });
+lv.addEventListener("change", async e => {
+  const t = e.target;
+  if (t.id === "l-sort") { lib.sort = t.value; saveLib(); drawLibraryRows(); }
+  else if (t.id === "l-fmt") { lib.fmt = t.value; saveLib(); drawLibraryRows(); }
+  else if (t.id === "l-pil") { lib.pil = Number(t.value); saveLib(); drawLibraryRows(); }
+  else if (t.id === "l-sched") { lib.sched = t.value; saveLib(); drawLibraryRows(); }
+  else if (t.dataset.lsel) { t.checked ? libSel.add(t.dataset.lsel) : libSel.delete(t.dataset.lsel); t.closest("tr").classList.toggle("sel", t.checked); libConfirm = false; drawBulk(); }
+  else if (t.id === "l-all") { libList().forEach(p => t.checked ? libSel.add(p.id) : libSel.delete(p.id)); drawLibraryRows(); }
+  else if (t.dataset.lstatus) { const id = t.dataset.lstatus; await setStatus(id, t.value); if (posts.find(p => p.id === id)?.status !== t.value) t.value = posts.find(p => p.id === id)?.status; }
+  else if (t.id === "l-move" && t.value) {
+    let moved = 0, blocked = 0;
+    for (const id of libSel) { const p = posts.find(x => x.id === id); if (!p) continue; if (t.value === "ready" && missing(p).length) { blocked++; continue; } await store.save({ ...structuredClone(p), status: t.value, date: t.value === "posted" && !p.date ? TODAY : p.date }); moved++; }
+    toast(`Moved ${moved}${blocked ? `. ${blocked} still need work before they're ready` : ""}`); libSel.clear(); drawLibraryRows();
+  }
+});
+lv.addEventListener("click", async e => {
+  const b = e.target.closest("button");
+  if (!b) {
+    const row = e.target.closest("tr[data-row]");
+    if (row && !e.target.closest("input, select, label")) { selectedId = row.dataset.row; draft = null; go("studio"); }
+    return;
+  }
+  if (b.dataset.lst) { const k = b.dataset.lst; lib.st = lib.st.includes(k) ? lib.st.filter(x => x !== k) : [...lib.st, k]; saveLib(); renderLibrary(); }
+  else if (b.id === "l-new") { const id = uid(); await store.save({ ...blankPost(), id, title: "New post" }); selectedId = id; draft = null; go("studio"); }
+  else if (b.id === "l-clear") { libSel.clear(); libConfirm = false; drawLibraryRows(); }
+  else if (b.id === "l-del") { libConfirm = true; drawBulk(); }
+  else if (b.id === "l-delno") { libConfirm = false; drawBulk(); }
+  else if (b.id === "l-delyes") { const ids = [...libSel]; libSel.clear(); libConfirm = false; for (const id of ids) await store.remove(id); toast(`Deleted ${ids.length}`); drawLibraryRows(); }
+  else if (b.id === "l-sched-btn") {
+    let n = 0;
+    for (const id of libSel) { const p = posts.find(x => x.id === id); if (!p || p.date) continue; const d = nextEmptyDate(); await store.save({ ...structuredClone(p), date: d }); posts = posts.map(x => x.id === id ? { ...x, date: d } : x); n++; }
+    toast(n ? `Scheduled ${n} into open days` : "Those already have dates"); libSel.clear(); drawLibraryRows();
+  }
+  else if (b.id === "l-draft") { const ids = [...libSel].filter(id => posts.find(p => p.id === id)?.status === "idea"); libSel.clear(); go("bank"); batchDraft(ids); }
+});
+
+/* ---------- Feed grid: preview the profile ---------- */
+let gridDrafts = false;
+function gridList() {
+  const show = posts.filter(p => p.status === "ready" || p.status === "posted" || (gridDrafts && p.status === "drafted"));
+  const upcoming = show.filter(p => p.status !== "posted").sort((a, b) => (b.date || "9999").localeCompare(a.date || "9999"));
+  const posted = show.filter(p => p.status === "posted").sort((a, b) => (b.date || "").localeCompare(a.date || ""));
+  return [...upcoming, ...posted];
+}
+function renderGrid() {
+  const el = $("#v-grid"), list = gridList();
+  const auto = list.filter(p => p.status !== "posted" && !THEMES[p.theme]);
+  el.innerHTML = `
+    <div class="row" style="justify-content:space-between;align-items:end">
+      <div><p class="eyebrow">Newest top left, the way your profile will look</p><h2 style="font-size:clamp(30px,5vw,46px)">Feed grid</h2></div>
+      <div class="row">
+        <label style="display:inline-flex;gap:6px;align-items:center;font-weight:600"><input type="checkbox" id="gr-drafts"${gridDrafts ? " checked" : ""}> Include drafts</label>
+        <button class="btn" id="gr-balance" ${auto.length > 1 ? "" : "disabled"} title="Only changes upcoming posts on Auto">Balance the looks</button>
+      </div>
+    </div>
+    <p class="muted" style="margin:0;max-width:64ch">A good grid breathes: alternate light and dark looks, and mix carousels with quotes. “Balance the looks” sets upcoming posts on Auto so no two neighbors match.</p>
+    <div class="feed-profile"><span class="av" aria-hidden="true"></span><div><b style="font-family:var(--f-display);font-size:22px;text-transform:uppercase">${esc(settings.brandName || settings.handle)}</b><div class="muted" style="font-size:13px">${list.filter(p => p.status !== "posted").length} upcoming · ${list.filter(p => p.status === "posted").length} posted</div></div></div>
+    <div class="feed">${list.map(p => `<button data-gopen="${p.id}" aria-label="${esc(p.title || p.hook || "Post")}"><canvas width="324" height="405" data-thumb="${p.id}"></canvas>
+      ${p.status !== "posted" ? `<span class="badge">${p.date ? esc(fmtDay(p.date).replace(/^\w+, /, "")) : STATUS_LABEL[p.status]}</span>` : ""}
+      ${(p.format || "carousel") !== "quote" ? `<span class="fmtb">${p.format === "reel" ? "▶" : p.format === "text" ? "Aa" : "❐"}</span>` : ""}</button>`).join("")
+      || `<p class="muted" style="grid-column:1/-1;padding:24px;text-align:center">Mark posts ready to see your grid take shape.</p>`}</div>`;
+  drawThumbs("#v-grid");
+}
+$("#v-grid").addEventListener("change", e => { if (e.target.id === "gr-drafts") { gridDrafts = e.target.checked; renderGrid(); } });
+$("#v-grid").addEventListener("click", async e => {
+  const b = e.target.closest("button"); if (!b) return;
+  if (b.dataset.gopen) { selectedId = b.dataset.gopen; draft = null; go("studio"); }
+  else if (b.id === "gr-balance") {
+    const list = gridList(), looks = Object.keys(THEMES), chosen = list.map(x => themeKey(x));
+    let n = 0;
+    for (let i = 0; i < list.length; i++) {
+      const p = list[i]; if (p.status === "posted" || THEMES[p.theme]) continue;
+      // Neighbors in a 3-wide grid: the cell to the left and the cell above.
+      const near = [i % 3 ? chosen[i - 1] : null, chosen[i - 3]].filter(Boolean);
+      const wantDark = !(i % 3 && DARK_LOOKS.has(chosen[i - 1]));
+      const pref = [themeKey(p), ...looks.filter(k => k !== "journal" || p.format === "quote")];
+      const pick = pref.find(k => DARK_LOOKS.has(k) === wantDark && !near.includes(k)) || pref.find(k => !near.includes(k)) || themeKey(p);
+      chosen[i] = pick;
+      await store.save({ ...structuredClone(p), theme: pick }); n++;
+    }
+    toast(`Balanced ${n} upcoming post${n === 1 ? "" : "s"}`); renderGrid();
+  }
+});
+
 /* ---------- Inspire: journal + swipe file ---------- */
 const PROMPTS = ["What did God show me today?", "Where did I see His faithfulness this week?", "What am I wrestling with?", "Which habit is forming me, for better or worse?", "Scripture I'm sitting with, and why", "What would I tell a younger brother about this?", "What did my body need today, and did I listen?", "Who did I serve today? Who served me?"];
 let inspireTab = "journal", jSel = null, jDraft = null, jTimer = null, jIdeas = null, swipeForm = false, swipeBusy = null, styleNotes = "";
 function onInspireData() {
-  if (view !== "inspire") return;
+  renderSubnav();
+  if (SECTION[view] !== "inspire") return;
   if ($("#v-inspire").contains(document.activeElement) && document.activeElement.matches("textarea, input")) { if (inspireTab === "journal") drawEntries(); return; }
   renderInspire();
 }
@@ -1613,8 +1888,7 @@ function renderInspire() {
   const el = $("#v-inspire");
   el.innerHTML = `
     <div class="row" style="justify-content:space-between;align-items:end">
-      <div><p class="eyebrow">Prayer, reflection, and the craft of others</p><h2 style="font-size:clamp(30px,5vw,46px)">Inspire</h2></div>
-      <div class="seg" role="group" aria-label="Section"><button data-itab="journal" aria-pressed="${inspireTab === "journal"}">Journal</button><button data-itab="swipe" aria-pressed="${inspireTab === "swipe"}">Swipe file</button></div>
+      <div><p class="eyebrow">${inspireTab === "journal" ? "Prayer and reflection, kept private" : "The craft of creators you admire"}</p><h2 style="font-size:clamp(30px,5vw,46px)">${inspireTab === "journal" ? "Journal" : "Swipe file"}</h2></div>
     </div>
     <div id="ins-body"></div>`;
   inspireTab === "journal" ? renderJournal() : renderSwipe();

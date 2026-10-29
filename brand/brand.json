@@ -223,6 +223,106 @@
     "c": "#000000"
    },
    "serif": true
+  },
+  "olive": {
+   "label": "Olive Grove",
+   "stops": [
+    [
+     0,
+     "#414A33"
+    ],
+    [
+     0.6,
+     "#333B28"
+    ],
+    [
+     1,
+     "#262D1E"
+    ]
+   ],
+   "fg": "#F2ECDD",
+   "accent": "#DDB86E",
+   "sun": {
+    "x": 0.84,
+    "y": 0.12,
+    "r": 85,
+    "c": "#E9C987"
+   }
+  },
+  "mist": {
+   "label": "Morning Mist",
+   "stops": [
+    [
+     0,
+     "#D7DEE2"
+    ],
+    [
+     0.55,
+     "#E9E2D8"
+    ],
+    [
+     1,
+     "#F3D3B4"
+    ]
+   ],
+   "fg": "#24303A",
+   "accent": "#B05A35",
+   "sun": {
+    "x": 0.5,
+    "y": 1.04,
+    "r": 150,
+    "c": "#FFE7C9"
+   }
+  },
+  "harvest": {
+   "label": "Harvest",
+   "stops": [
+    [
+     0,
+     "#F0DDB5"
+    ],
+    [
+     0.6,
+     "#E2BE82"
+    ],
+    [
+     1,
+     "#CF9C5C"
+    ]
+   ],
+   "fg": "#2E1D0F",
+   "accent": "#7A3B15",
+   "sun": {
+    "x": 0.82,
+    "y": 0.15,
+    "r": 105,
+    "c": "#FFF1D2"
+   }
+  },
+  "rose": {
+   "label": "Desert Rose",
+   "stops": [
+    [
+     0,
+     "#F2D8CC"
+    ],
+    [
+     0.6,
+     "#E6B5A2"
+    ],
+    [
+     1,
+     "#CF8E7A"
+    ]
+   ],
+   "fg": "#2E1B1A",
+   "accent": "#8E3B2E",
+   "sun": {
+    "x": 0.8,
+    "y": 0.14,
+    "r": 100,
+    "c": "#FFF0E6"
+   }
   }
  },
  "pillarTheme": {

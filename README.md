@@ -10,12 +10,17 @@ The production side of a faith and holistic-health content brand. The **engine p
 | Tab | What it's for |
 | --- | --- |
 | Sprint | 30-day calendar, pillar mix, what's landing |
-| Bank | Ideas → Drafts → Ready → Posted. Runway meter, Plan 10 ideas, batch drafting |
-| Studio | Edit a post: slides, photos, looks, caption, script, X post, finished video, results |
-| Generate | Claude writes a post in any format (carousel, quote, reel, text) |
+| Content → Board | Ideas → Drafts → Ready → Posted. Runway meter, Plan 10 ideas, batch drafting |
+| Content → Library | Every post, searchable and filterable, with bulk actions |
+| Content → Feed grid | Preview the profile grid; "Balance the looks" alternates light and dark |
+| Content → Studio | Edit a post: slides, photos, look, type, caption, script, X post, finished video, results |
+| Ideas → Generate | Claude writes a post in any format, look, and type |
+| Ideas → Journal | Private prayer journal that surfaces post ideas |
+| Ideas → Swipe file | Screenshots of posts you admire, broken down by Claude |
 | Tree | Mind map of pillars, niches, series, ideas, inspiration, brands, values |
-| Inspire | Private prayer journal that surfaces post ideas, and a swipe file of posts you admire |
 | Playbook | Voice guide, settings, Bloom lessons, Sunday review |
+
+Slide looks: Dawn, Golden Hour, Sage Morning, Clay, Dusk, Linen Sun, Ember, Journal, Olive Grove, Morning Mist, Harvest, Desert Rose, Evening Pine. Type: Bold (Barlow Condensed) or Serif (Newsreader).
 
 ## Daily flow (semi-automatic)
 

@@ -9,10 +9,15 @@ const THEMES = {
   linen:  { label: "Linen Sun",    stops: [[0, "#F6EFE3"], [1, "#EEDFC9"]],                                      fg: "#3A2516", accent: "#BC5C27", soft: "rgba(58,37,22,.74)",    sun: { x: .82, y: .16, r: 120, c: "#F2A35E" } },
   ember:  { label: "Ember",        stops: [[0, "#17120F"], [0.6, "#231913"], [1, "#3F2416"]],                    fg: "#F4E9DC", accent: "#E9A25A", soft: "rgba(244,233,220,.78)", sun: { x: .5, y: 1.05, r: 170, c: "#D9733A" } },
   journal:{ label: "Journal",      stops: [[0, "#F4EFE5"], [1, "#ECE3D3"]],                                      fg: "#2B2620", accent: "#8C5A2B", soft: "rgba(43,38,32,.72)", sun: { x: .5, y: .5, r: 0, c: "#000000" }, serif: true },
+  olive:  { label: "Olive Grove",  stops: [[0, "#414A33"], [0.6, "#333B28"], [1, "#262D1E"]],                    fg: "#F2ECDD", accent: "#DDB86E", soft: "rgba(242,236,221,.78)", sun: { x: .84, y: .12, r: 85,  c: "#E9C987" } },
+  mist:   { label: "Morning Mist", stops: [[0, "#D7DEE2"], [0.55, "#E9E2D8"], [1, "#F3D3B4"]],                    fg: "#24303A", accent: "#B05A35", soft: "rgba(36,48,58,.74)",    sun: { x: .5, y: 1.04, r: 150, c: "#FFE7C9" } },
+  harvest:{ label: "Harvest",      stops: [[0, "#F0DDB5"], [0.6, "#E2BE82"], [1, "#CF9C5C"]],                    fg: "#2E1D0F", accent: "#7A3B15", soft: "rgba(46,29,15,.76)",    sun: { x: .82, y: .15, r: 105, c: "#FFF1D2" } },
+  rose:   { label: "Desert Rose",  stops: [[0, "#F2D8CC"], [0.6, "#E6B5A2"], [1, "#CF8E7A"]],                    fg: "#2E1B1A", accent: "#8E3B2E", soft: "rgba(46,27,26,.76)",    sun: { x: .8, y: .14, r: 100, c: "#FFF0E6" } },
   pine:   { label: "Evening Pine", stops: [[0, "#24432F"], [1, "#152A1F"]],                                      fg: "#F2EEE3", accent: "#E8B04B", soft: "rgba(242,238,227,.74)", sun: { x: .85, y: .13, r: 70,  c: "#E8B04B" } },
 };
 // "Auto" picks a look per pillar so the grid reads as one family with variety.
 const PILLAR_THEME = { 1: "dusk", 2: "dawn", 3: "sage", 4: "golden", 5: "clay", 6: "linen", 7: "golden", 8: "pine" };
+const DARK_LOOKS = new Set(["dawn", "clay", "dusk", "pine", "ember", "olive"]);
 const FORMATS = { carousel: "Carousel", quote: "Quote", reel: "Reel", text: "Text post" };
 const themeKey = post => THEMES[post.theme] ? post.theme : THEMES[settings.theme] ? settings.theme : post.format === "quote" ? (post.pillar === 1 ? "journal" : "ember") : PILLAR_THEME[post.pillar] || "dawn";
 const themeSwatch = k => `linear-gradient(180deg, ${THEMES[k].stops.map(([o, c]) => `${c} ${Math.round(o * 100)}%`).join(", ")})`;
@@ -89,7 +94,7 @@ function drawSlide(cv, post, i) {
   const photoUrl = s.photo || (i === 0 ? post.cover : null), photo = photoUrl ? imgCache[photoUrl] : null;
   const base = THEMES[themeKey(post)];
   const T = photo ? { ...base, fg: "#FFF6EA", soft: "rgba(255,246,234,.85)", accent: base.serif ? "#E9C08A" : base.accent, foot: null } : base;
-  const sf = !!base.serif, up = t => sf ? t : t.toUpperCase(), lhD = sf ? 1.08 : 0.94;
+  const sf = post.type ? post.type === "serif" : !!base.serif, up = t => sf ? t : t.toUpperCase(), lhD = sf ? 1.08 : 0.94;
   const display = sz => sf ? `500 ${sz}px "Newsreader", Georgia, serif` : `800 ${sz}px "Barlow Condensed", "Arial Narrow", sans-serif`;
   const bold = sz => sf ? `500 ${sz}px "Newsreader", Georgia, serif` : `700 ${sz}px "Barlow Condensed", "Arial Narrow", sans-serif`;
   const serif = (sz, it) => `${it ? "italic " : ""}400 ${sz}px "Newsreader", Georgia, serif`;
