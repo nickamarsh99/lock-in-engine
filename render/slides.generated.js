@@ -26,7 +26,7 @@ const pad = n => String(n).padStart(2, "0");
 const W = 1080, H = 1350, M = 96;
 let fontsReady = null;
 function loadFonts() {
-  return fontsReady ||= Promise.all(['800 100px "Barlow Condensed"', '700 100px "Barlow Condensed"', '600 30px "Barlow"', '700 30px "Barlow"', '400 44px "Newsreader"', '500 44px "Newsreader"', 'italic 400 44px "Newsreader"']
+  return fontsReady ||= Promise.all(['800 100px "Barlow Condensed"', '700 100px "Barlow Condensed"', '600 30px "Barlow"', '700 30px "Barlow"', '400 44px "Newsreader"', '500 44px "Newsreader"', 'italic 400 44px "Newsreader"', '600 60px "Cormorant Garamond"', 'italic 600 60px "Cormorant Garamond"', '600 60px "Fraunces"', 'italic 600 60px "Fraunces"', '400 60px "DM Serif Display"', 'italic 400 60px "DM Serif Display"', '700 60px "Zilla Slab"', '700 60px "Courier Prime"', '400 40px "Courier Prime"', 'italic 400 40px "Courier Prime"', '700 60px "Caveat"']
     .map(f => document.fonts.load(f).catch(() => null)));
 }
 function lines(ctx, text, maxW) {
@@ -59,16 +59,109 @@ function grain(ctx, alpha) {
   }
   ctx.save(); ctx.globalAlpha = alpha; ctx.globalCompositeOperation = "overlay"; ctx.fillStyle = ctx.createPattern(grainTile, "repeat"); ctx.fillRect(0, 0, W, H); ctx.restore();
 }
-function paintBackground(ctx, T, i) {
+// Font pairings. Headlines change; labels stay Barlow so every post still reads as the brand.
+const NR = "\"Newsreader\", Georgia, serif";
+const TYPESETS = {
+  bold:       { label: "Bold",        head: sz => `800 ${sz}px "Barlow Condensed", "Arial Narrow", sans-serif`, mid: sz => `700 ${sz}px "Barlow Condensed", "Arial Narrow", sans-serif`, upper: true, lh: 0.94, size: 1, num: sz => `800 ${sz}px "Barlow Condensed", sans-serif` },
+  serif:      { label: "Serif",       head: sz => `500 ${sz}px ${NR}`, upper: false, lh: 1.08, size: .79, num: sz => `italic 400 ${sz}px ${NR}` },
+  garamond:   { label: "Garamond",    head: sz => `600 ${sz}px "Cormorant Garamond", Garamond, Georgia, serif`, upper: false, lh: 1.02, size: .9, mid: sz => `600 ${Math.round(sz * 1.08)}px "Cormorant Garamond", Garamond, Georgia, serif`, num: sz => `italic 600 ${sz}px "Cormorant Garamond", Georgia, serif` },
+  fraunces:   { label: "Fraunces",    head: sz => `600 ${sz}px "Fraunces", Georgia, serif`, upper: false, lh: 1.05, size: .76, num: sz => `italic 600 ${sz}px "Fraunces", Georgia, serif` },
+  editorial:  { label: "Editorial",   head: sz => `400 ${sz}px "DM Serif Display", Georgia, serif`, upper: false, lh: 1.04, size: .8, num: sz => `italic 400 ${sz}px "DM Serif Display", Georgia, serif` },
+  slab:       { label: "Slab",        head: sz => `700 ${sz}px "Zilla Slab", Rockwell, Georgia, serif`, upper: true, lh: 0.98, size: .82, num: sz => `700 ${sz}px "Zilla Slab", Georgia, serif` },
+  typewriter: { label: "Typewriter",  head: sz => `700 ${sz}px "Courier Prime", "Courier New", monospace`, upper: false, lh: 1.14, size: .58, mid: sz => `700 ${Math.round(sz * .8)}px "Courier Prime", "Courier New", monospace`, num: sz => `700 ${sz}px "Courier Prime", monospace`, body: (sz, it) => `${it ? "italic " : ""}400 ${Math.round(sz * .9)}px "Courier Prime", "Courier New", monospace` },
+  script:     { label: "Handwritten", head: sz => `700 ${sz}px "Caveat", "Segoe Script", cursive`, upper: false, lh: 0.98, size: 1, mid: sz => `700 ${Math.round(sz * 1.18)}px "Caveat", cursive`, num: sz => `700 ${sz}px "Caveat", cursive` },
+};
+const FONT_CSS = { bold: "font-family:var(--f-display);font-weight:800;text-transform:uppercase", serif: "font-family:var(--f-serif);font-weight:500", garamond: "font-family:'Cormorant Garamond',serif;font-weight:600;font-size:17px", fraunces: "font-family:Fraunces,serif;font-weight:600", editorial: "font-family:'DM Serif Display',serif", slab: "font-family:'Zilla Slab',serif;font-weight:700;text-transform:uppercase", typewriter: "font-family:'Courier Prime',monospace;font-weight:700", script: "font-family:Caveat,cursive;font-weight:700;font-size:19px" };
+const typeKey = post => TYPESETS[post.type] ? post.type : THEMES[themeKey(post)].serif ? "serif" : "bold";
+
+// Scenes: landscapes drawn in each look's own colors, so a photo-like background never fights the palette.
+const SCENES = { none: "Gradient", ridges: "Mountains", hills: "Hills", pines: "Pine ridge", ocean: "Ocean", dunes: "Dunes", field: "Wheat field", stars: "Night sky", rays: "Sun rays", paper: "Paper" };
+const GROUNDED = new Set(["ridges", "hills", "pines", "ocean", "dunes", "field", "stars"]);
+const sceneKey = post => SCENES[post.scene] ? post.scene : "none";
+function seeded(seed) { let s = seed % 2147483647 || 11; return () => (s = s * 16807 % 2147483647) / 2147483647; }
+function mixHex(a, b, t) {
+  const p = x => { const n = parseInt(x.slice(1), 16); return [n >> 16, (n >> 8) & 255, n & 255]; };
+  const A = p(a), B = p(b); return `rgb(${A.map((v, k) => Math.round(v + (B[k] - v) * t)).join(",")})`;
+}
+function paintScene(ctx, T, key, i, dark) {
+  if (key === "none") return;
+  const rnd = seeded(97 + key.length * 131), base = T.stops[T.stops.length - 1][1], ink = dark ? "#0B0806" : T.fg;
+  const layer = t => mixHex(base, ink, t);
+  const top = H * (i === 0 ? 0.7 : 0.8), span = H - top;
+  const ridge = (y0, amp, rough, color, seg = 9) => {
+    let pts = [[0, y0], [W, y0 + (rnd() - .5) * amp]];
+    for (let d = 0; d < seg; d++) {
+      const next = [];
+      for (let k = 0; k < pts.length - 1; k++) { const [x1, y1] = pts[k], [x2, y2] = pts[k + 1]; next.push(pts[k], [(x1 + x2) / 2, (y1 + y2) / 2 + (rnd() - .5) * amp * Math.pow(rough, d)]); }
+      next.push(pts[pts.length - 1]); pts = next; if (pts.length > 300) break;
+    }
+    ctx.fillStyle = color; ctx.beginPath(); ctx.moveTo(0, H); pts.forEach(([x, y]) => ctx.lineTo(x, y)); ctx.lineTo(W, H); ctx.closePath(); ctx.fill();
+  };
+  const wave = (y0, amp, freq, phase, color) => {
+    ctx.fillStyle = color; ctx.beginPath(); ctx.moveTo(0, H);
+    for (let x = 0; x <= W; x += 12) ctx.lineTo(x, y0 + Math.sin(x / W * Math.PI * freq + phase) * amp + Math.sin(x / W * Math.PI * freq * 2.3 + phase * 2) * amp * .35);
+    ctx.lineTo(W, H); ctx.closePath(); ctx.fill();
+  };
+  if (key === "ridges" || key === "stars") {
+    if (key === "stars") {
+      for (let k = 0; k < 140; k++) { const x = rnd() * W, y = rnd() * top * .9, r = rnd() * 2.2 + .4; ctx.fillStyle = hexA(dark ? "#FFF6E6" : T.fg, .25 + rnd() * .55); ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill(); }
+    }
+    ridge(top, 220, .55, layer(.35)); ridge(top + span * .22, 180, .55, layer(.6)); ridge(top + span * .45, 150, .55, layer(.85));
+  } else if (key === "hills") {
+    wave(top + 20, 34, 2.2, .6, layer(.35)); wave(top + span * .28, 40, 1.6, 2.1, layer(.6)); wave(top + span * .55, 30, 1.2, 4, layer(.86));
+  } else if (key === "pines") {
+    wave(top + span * .2, 30, 1.8, 1, layer(.45));
+    const gy = top + span * .5; wave(gy, 22, 1.3, 3, layer(.86));
+    ctx.fillStyle = layer(.86);
+    for (let k = 0; k < 15; k++) {
+      const x = rnd() * W, h = 70 + rnd() * (i === 0 ? 150 : 90), w = h * .42, yb = gy + 14 + rnd() * 20;
+      for (let t = 0; t < 3; t++) { const yy = yb - h * t * .28; ctx.beginPath(); ctx.moveTo(x, yy - h * .55); ctx.lineTo(x - w * (1 - t * .22) / 2, yy); ctx.lineTo(x + w * (1 - t * .22) / 2, yy); ctx.closePath(); ctx.fill(); }
+      ctx.fillRect(x - 3, yb - 2, 6, 14);
+    }
+  } else if (key === "ocean") {
+    const hy = top + span * .12;
+    const g = ctx.createLinearGradient(0, hy, 0, H); g.addColorStop(0, layer(.45)); g.addColorStop(1, layer(.88));
+    ctx.fillStyle = g; ctx.fillRect(0, hy, W, H - hy);
+    const sx = T.sun.r ? T.sun.x * W : W / 2;
+    for (let k = 0; k < 18; k++) { const y = hy + 6 + k * (H - hy) / 18, w = (1 - k / 22) * 220 * (.5 + rnd() * .6); ctx.fillStyle = hexA(T.sun.r ? T.sun.c : T.accent, .5 * (1 - k / 18)); ctx.fillRect(sx - w / 2 + (rnd() - .5) * 30, y, w, 3 + rnd() * 3); }
+    ctx.fillStyle = hexA(T.sun.r ? T.sun.c : T.accent, .35); ctx.fillRect(0, hy, W, 2);
+  } else if (key === "dunes") {
+    for (const [t, y, a, ph] of [[.35, top, 50, .4], [.6, top + span * .3, 44, 2.6], [.85, top + span * .58, 36, 5]]) {
+      ctx.fillStyle = layer(t); ctx.beginPath(); ctx.moveTo(0, H);
+      for (let x = 0; x <= W; x += 10) ctx.lineTo(x, y - Math.abs(Math.sin(x / W * Math.PI * 1.4 + ph)) * a * 1.8);
+      ctx.lineTo(W, H); ctx.closePath(); ctx.fill();
+    }
+  } else if (key === "field") {
+    const gy = top + span * .45; wave(top + span * .15, 18, 1.4, 1.5, layer(.4)); wave(gy, 10, 1, 2, layer(.8));
+    ctx.strokeStyle = layer(.8); ctx.lineCap = "round";
+    for (let k = 0; k < 170; k++) {
+      const x = rnd() * W, h = 60 + rnd() * (i === 0 ? 170 : 110), lean = (rnd() - .4) * 40, yb = gy + 20 + rnd() * 40;
+      ctx.lineWidth = 2 + rnd() * 2; ctx.beginPath(); ctx.moveTo(x, yb); ctx.quadraticCurveTo(x + lean * .3, yb - h * .6, x + lean, yb - h); ctx.stroke();
+      if (rnd() < .4) { ctx.fillStyle = layer(.75); ctx.beginPath(); ctx.ellipse(x + lean, yb - h - 12, 5, 16, lean / 120, 0, Math.PI * 2); ctx.fill(); }
+    }
+  } else if (key === "rays") {
+    const cx = (T.sun.r ? T.sun.x : .85) * W, cy = (T.sun.r ? T.sun.y : .1) * H, c = T.sun.r ? T.sun.c : T.accent;
+    ctx.save(); ctx.globalCompositeOperation = dark ? "screen" : "soft-light";
+    for (let k = 0; k < 14; k++) { const a = k / 14 * Math.PI * 2 + .2, w = .05 + rnd() * .06; ctx.fillStyle = hexA(c, dark ? .1 : .35); ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(cx + Math.cos(a - w) * 2400, cy + Math.sin(a - w) * 2400); ctx.lineTo(cx + Math.cos(a + w) * 2400, cy + Math.sin(a + w) * 2400); ctx.closePath(); ctx.fill(); }
+    ctx.restore();
+  } else if (key === "paper") {
+    for (let k = 0; k < 900; k++) { const x = rnd() * W, y = rnd() * H, l = 6 + rnd() * 26, a = rnd() * Math.PI; ctx.strokeStyle = hexA(rnd() < .5 ? "#FFFFFF" : (dark ? "#000000" : T.fg), .05 + rnd() * .06); ctx.lineWidth = .8; ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + Math.cos(a) * l, y + Math.sin(a) * l); ctx.stroke(); }
+    const v = ctx.createRadialGradient(W / 2, H / 2, H * .35, W / 2, H / 2, H * .8); v.addColorStop(0, "rgba(0,0,0,0)"); v.addColorStop(1, dark ? "rgba(0,0,0,.35)" : "rgba(60,40,20,.14)");
+    ctx.fillStyle = v; ctx.fillRect(0, 0, W, H);
+  }
+}
+function paintBackground(ctx, T, i, scene = "none", dark = false) {
   const g = ctx.createLinearGradient(0, 0, 0, H); T.stops.forEach(([o, c]) => g.addColorStop(o, c));
   ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
-  if (!T.sun.r) { grain(ctx, 0.1); return; }
-  const k = i === 0 ? 1 : 0.72, cx = T.sun.x * W, cy = T.sun.y * H, R = T.sun.r * k;
-  const glow = ctx.createRadialGradient(cx, cy, R * 0.85, cx, cy, R * 4.4);
-  glow.addColorStop(0, hexA(T.sun.c, 0.5 * k)); glow.addColorStop(0.4, hexA(T.sun.c, 0.14 * k)); glow.addColorStop(1, hexA(T.sun.c, 0));
-  ctx.fillStyle = glow; ctx.fillRect(0, 0, W, H);
-  ctx.fillStyle = hexA(T.sun.c, i === 0 ? 1 : 0.8); ctx.beginPath(); ctx.arc(cx, cy, R, 0, Math.PI * 2); ctx.fill();
-  grain(ctx, 0.08);
+  if (T.sun.r) {
+    const k = i === 0 ? 1 : 0.72, cx = T.sun.x * W, cy = T.sun.y * H, R = T.sun.r * k;
+    const glow = ctx.createRadialGradient(cx, cy, R * 0.85, cx, cy, R * 4.4);
+    glow.addColorStop(0, hexA(T.sun.c, 0.5 * k)); glow.addColorStop(0.4, hexA(T.sun.c, 0.14 * k)); glow.addColorStop(1, hexA(T.sun.c, 0));
+    ctx.fillStyle = glow; ctx.fillRect(0, 0, W, H);
+    ctx.fillStyle = hexA(T.sun.c, i === 0 ? 1 : 0.8); ctx.beginPath(); ctx.arc(cx, cy, R, 0, Math.PI * 2); ctx.fill();
+  }
+  paintScene(ctx, T, scene, i, dark);
+  grain(ctx, T.sun.r ? 0.08 : 0.1);
 }
 const imgCache = {};
 const postPhotos = post => [post.cover, ...(post.slides || []).map(x => x.photo)].filter(Boolean);
@@ -92,15 +185,17 @@ function drawSlide(cv, post, i) {
   const ctx = cv.getContext("2d");
   const slides = post.slides, n = slides.length, s = slides[i] || { h: "", b: "" };
   const photoUrl = s.photo || (i === 0 ? post.cover : null), photo = photoUrl ? imgCache[photoUrl] : null;
-  const base = THEMES[themeKey(post)];
-  const T = photo ? { ...base, fg: "#FFF6EA", soft: "rgba(255,246,234,.85)", accent: base.serif ? "#E9C08A" : base.accent, foot: null } : base;
-  const sf = post.type ? post.type === "serif" : !!base.serif, up = t => sf ? t : t.toUpperCase(), lhD = sf ? 1.08 : 0.94;
-  const display = sz => sf ? `500 ${sz}px "Newsreader", Georgia, serif` : `800 ${sz}px "Barlow Condensed", "Arial Narrow", sans-serif`;
-  const bold = sz => sf ? `500 ${sz}px "Newsreader", Georgia, serif` : `700 ${sz}px "Barlow Condensed", "Arial Narrow", sans-serif`;
-  const serif = (sz, it) => `${it ? "italic " : ""}400 ${sz}px "Newsreader", Georgia, serif`;
+  const tk = themeKey(post), base = THEMES[tk], scene = photo ? "none" : sceneKey(post), grounded = GROUNDED.has(scene);
+  const T = photo ? { ...base, fg: "#FFF6EA", soft: "rgba(255,246,234,.85)", accent: base.serif ? "#E9C08A" : base.accent, foot: null }
+    : grounded ? { ...base, foot: "rgba(255,246,234,.92)" } : base;
+  const ts = TYPESETS[typeKey(post)], up = t => ts.upper ? t.toUpperCase() : t, lhD = ts.lh;
+  const display = ts.head, bold = ts.mid || ts.head;
+  const serif = ts.body || ((sz, it) => `${it ? "italic " : ""}400 ${sz}px ${NR}`);
   const ui = sz => `700 ${sz}px "Barlow", system-ui, sans-serif`;
+  // With a landscape along the bottom, text keeps to the sky.
+  const floor = grounded ? H * (i === 0 ? 0.66 : 0.77) : H - 170;
   ctx.textBaseline = "alphabetic"; spaced(ctx, 0);
-  if (photo) paintPhoto(ctx, photo, i > 0 || post.format === "quote"); else paintBackground(ctx, T, i);
+  if (photo) paintPhoto(ctx, photo, i > 0 || post.format === "quote"); else paintBackground(ctx, T, i, scene, DARK_LOOKS.has(tk));
   const maxW = W - M * 2;
   const footer = right => {
     ctx.font = ui(28); spaced(ctx, 1.5); ctx.fillStyle = T.foot || T.soft;
@@ -110,13 +205,14 @@ function drawSlide(cv, post, i) {
   };
   if (post.format === "quote") {
     // Mindset statement: one thought, set like a page from a journal.
-    const q = fit(ctx, s.h || post.hook || "", sz => `500 ${sz}px "Newsreader", Georgia, serif`, maxW, 720, 100, 50, 1.18);
+    const qs = TYPESETS[post.type] || TYPESETS.serif, qlh = qs.lh + 0.1, qk = qs.upper ? .92 : qs === TYPESETS.typewriter ? .72 : qs === TYPESETS.script ? 1.2 : 1;
+    const q = fit(ctx, qs.upper ? (s.h || post.hook || "").toUpperCase() : (s.h || post.hook || ""), qs.head, maxW, grounded ? 560 : 720, Math.round(100 * qk), Math.round(50 * qk), qlh);
     const attr = s.b ? s.b.toUpperCase() : "";
-    const blockH = 130 + q.ls.length * q.s * 1.18 + (attr ? 90 : 0);
-    let y = Math.max(200, (H - 150 - blockH) / 2 + 30);
-    ctx.font = `500 230px "Newsreader", Georgia, serif`; ctx.fillStyle = T.accent; ctx.fillText("“", M - 8, y + 150); y += 160;
-    ctx.font = `500 ${q.s}px "Newsreader", Georgia, serif`; ctx.fillStyle = T.fg;
-    q.ls.forEach(l => { y += q.s * 1.18; ctx.fillText(l, M, y - q.s * 0.25); });
+    const blockH = 130 + q.ls.length * q.s * qlh + (attr ? 90 : 0);
+    let y = Math.max(grounded ? 150 : 200, (floor + 20 - blockH) / 2 + 30);
+    ctx.font = `500 230px ${NR}`; ctx.fillStyle = T.accent; ctx.fillText("“", M - 8, y + 150); y += 160;
+    ctx.font = qs.head(q.s); ctx.fillStyle = T.fg;
+    q.ls.forEach(l => { y += q.s * qlh; ctx.fillText(l, M, y - q.s * 0.25); });
     if (attr) { y += 70; ctx.font = ui(28); spaced(ctx, 4); ctx.fillStyle = T.accent; ctx.fillText(attr.slice(0, 48), M, y); spaced(ctx, 0); }
     footer(n > 1 ? `${i + 1} / ${n}` : "");
     return;
@@ -124,11 +220,11 @@ function drawSlide(cv, post, i) {
   if (i === 0) {
     ctx.font = ui(28); spaced(ctx, 5); ctx.fillStyle = T.accent;
     ctx.fillText((P[post.pillar]?.short || "").toUpperCase(), M, 186); spaced(ctx, 0);
-    const head = fit(ctx, up(s.h || post.hook || ""), display, maxW, 640, sf ? 132 : 168, sf ? 64 : 80, lhD);
+    const head = fit(ctx, up(s.h || post.hook || ""), display, maxW, grounded ? 470 : 640, Math.round(168 * ts.size), Math.round(80 * ts.size), lhD);
     const sub = s.b ? fit(ctx, s.b, sz => serif(sz, true), maxW, 220, 50, 34, 1.3) : { s: 0, ls: [] };
     const blockH = head.ls.length * head.s * lhD + (sub.ls.length ? 44 + sub.ls.length * sub.s * 1.3 : 0);
     // With a photo, text sits low so the image reads first.
-    let y = (photo ? Math.max(330, H - 190 - blockH) : Math.max(330, (H - 170 - blockH) / 2 + 120)) + head.s * 0.8;
+    let y = (photo ? Math.max(330, H - 190 - blockH) : Math.max(grounded ? 260 : 330, (floor - blockH) / 2 + (grounded ? 90 : 120))) + head.s * 0.8;
     ctx.font = display(head.s); ctx.fillStyle = T.fg;
     head.ls.forEach(l => { ctx.fillText(l, M, y); y += head.s * lhD; });
     if (sub.ls.length) { y += 44 - head.s * lhD + sub.s * 1.1; ctx.font = serif(sub.s, true); ctx.fillStyle = T.soft; sub.ls.forEach(l => { ctx.fillText(l, M, y); y += sub.s * 1.3; }); }
@@ -138,22 +234,24 @@ function drawSlide(cv, post, i) {
   const last = i === n - 1 && n > 2;
   // Measure first so short slides sit in the optical center instead of hugging the top.
   const headFont = sz => (last ? display(sz) : bold(sz));
-  const mHead = fit(ctx, up(s.h || ""), headFont, maxW, last ? 420 : 330, last ? 130 : 100, 56, 0.98);
+  const hk = ts.upper ? 1 : ts === TYPESETS.typewriter ? .78 : ts === TYPESETS.script ? 1.1 : .95;
+  const hMax = Math.round((last ? 130 : 100) * hk), hMin = Math.round(56 * hk);
+  const mHead = fit(ctx, up(s.h || ""), headFont, maxW, last ? 420 : 330, hMax, hMin, 0.98);
   const topH = last ? 90 : 175;
-  const roomEst = H - 170 - (150 + topH + mHead.ls.length * mHead.s * 0.98 + 34);
+  const roomEst = floor - (150 + topH + mHead.ls.length * mHead.s * 0.98 + 34);
   const mBody = s.b && roomEst > 60 ? fit(ctx, s.b, sz => serif(sz, last), maxW, roomEst, 48, 30, 1.38) : null;
   const total = topH + mHead.ls.length * mHead.s * 0.98 + (mBody ? 34 + mBody.ls.length * mBody.s * 1.38 : 0);
-  let y = Math.max(150, Math.round((H - 170 - 150 - total) * 0.42) + 150);
+  let y = Math.max(150, Math.round((floor - 150 - total) * 0.42) + 150);
   if (!last) {
-    ctx.font = sf ? `italic 400 140px "Newsreader", Georgia, serif` : display(150); ctx.fillStyle = T.accent; ctx.fillText(pad(i), M - 6, y + 105); y += 175;
+    ctx.font = ts.num(ts.upper ? 150 : 140); ctx.fillStyle = T.accent; ctx.fillText(pad(i), M - 6, y + 105); y += 175;
   } else {
     ctx.font = ui(28); spaced(ctx, 5); ctx.fillStyle = T.accent; ctx.fillText("BEFORE YOU GO", M, y + 36); spaced(ctx, 0); y += 90;
   }
-  const head = fit(ctx, up(s.h || ""), headFont, maxW, last ? 420 : 330, last ? 130 : 100, 56, 0.98);
+  const head = fit(ctx, up(s.h || ""), headFont, maxW, last ? 420 : 330, hMax, hMin, 0.98);
   ctx.font = headFont(head.s); ctx.fillStyle = T.fg;
   y += head.s * 0.82; head.ls.forEach(l => { ctx.fillText(l, M, y); y += head.s * 0.98; });
   y += 40 - head.s * 0.68;
-  const room = H - 170 - y;
+  const room = floor - y;
   if (s.b && room > 60) {
     const body = fit(ctx, s.b, sz => serif(sz, last), maxW, room, 48, 30, 1.38);
     ctx.font = serif(body.s, last); ctx.fillStyle = last ? T.soft : T.fg; y += body.s;

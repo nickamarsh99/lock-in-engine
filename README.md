@@ -20,7 +20,11 @@ The production side of a faith and holistic-health content brand. The **engine p
 | Tree | Mind map of pillars, niches, series, ideas, inspiration, brands, values |
 | Playbook | Voice guide, settings, Bloom lessons, Sunday review |
 
-Slide looks: Dawn, Golden Hour, Sage Morning, Clay, Dusk, Linen Sun, Ember, Journal, Olive Grove, Morning Mist, Harvest, Desert Rose, Evening Pine. Type: Bold (Barlow Condensed) or Serif (Newsreader).
+Slide looks: Dawn, Golden Hour, Sage Morning, Clay, Dusk, Linen Sun, Ember, Journal, Olive Grove, Morning Mist, Harvest, Desert Rose, Evening Pine.
+Fonts: Bold (Barlow Condensed), Serif (Newsreader), Garamond (Cormorant Garamond), Fraunces, Editorial (DM Serif Display), Slab (Zilla Slab), Typewriter (Courier Prime), Handwritten (Caveat).
+Scenes (drawn in each look's colors): Mountains, Hills, Pine ridge, Ocean, Dunes, Wheat field, Night sky, Sun rays, Paper. Uploaded photos are reusable from Studio's photo library.
+
+**Ask Claude** (header bar, the floating Ask button, or press `/`): a chat on every tab for hooks, ideas, captions, and rewrites. It knows the brand brief and voice, can search the library and tree through page tools, and every result can be saved as an idea, sent to Generate, added to the tree, or copied. "Continue in Claude" opens a full claude.ai chat for web research.
 
 ## Daily flow (semi-automatic)
 

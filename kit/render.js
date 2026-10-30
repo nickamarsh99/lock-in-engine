@@ -13,6 +13,17 @@ const FACES = [
   ["Newsreader", 400, "normal", "Newsreader-Regular.ttf"],
   ["Newsreader", 500, "normal", "Newsreader-Medium.ttf"],
   ["Newsreader", 400, "italic", "Newsreader-Italic.ttf"],
+  ["Cormorant Garamond", 600, "normal", "CormorantGaramond-SemiBold.ttf"],
+  ["Cormorant Garamond", 600, "italic", "CormorantGaramond-SemiBoldItalic.ttf"],
+  ["Fraunces", 600, "normal", "Fraunces-SemiBold.ttf"],
+  ["Fraunces", 600, "italic", "Fraunces-SemiBoldItalic.ttf"],
+  ["DM Serif Display", 400, "normal", "DMSerifDisplay-Regular.ttf"],
+  ["DM Serif Display", 400, "italic", "DMSerifDisplay-Italic.ttf"],
+  ["Zilla Slab", 700, "normal", "ZillaSlab-Bold.ttf"],
+  ["Courier Prime", 400, "normal", "CourierPrime-Regular.ttf"],
+  ["Courier Prime", 400, "italic", "CourierPrime-Italic.ttf"],
+  ["Courier Prime", 700, "normal", "CourierPrime-Bold.ttf"],
+  ["Caveat", 700, "normal", "Caveat-Bold.ttf"],
 ];
 const PILLAR_SHORT = { 1: "Faith", 2: "Rhythms", 3: "Gut & Food", 4: "Table", 5: "Strength", 6: "Home & Discernment", 7: "Community", 8: "Calling" };
 
